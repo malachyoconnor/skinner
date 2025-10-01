@@ -3,4 +3,8 @@ project(skinner)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(skinner main.cpp)
+add_executable(skinner main.cpp
+        SkinningCommander.cpp
+        SkinningCommander.h
+        SkinningSession.h
+        FileReadingUtil.h)
