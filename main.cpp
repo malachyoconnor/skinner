@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <random>
 
+#include "utils.h"
 #include "src/FileReadingUtil.h"
 #include "src/SkinningCommander.h"
 #include "src/SkinningSession.h"
@@ -18,22 +19,29 @@ int main(int argc, char *argv[]) {
       return 1;
    }
 
-   const double WAIT_HOURS = 1.0 / 60.0 / 60.0;
+   const double WAIT_HOURS = 1.0;
+
+   bool file_exists = std::filesystem::exists(FILE_NAME);
 
    if (std::string(argv[1]) == "start") {
+      if (file_exists) {
+         PRINT("A session already exists, are you sure you want to start a new one?", RED);
+         cin.get();
+         PRINT("Are you really sure? If not, enter: `skinner resume`", RED);
+         cin.get();
+      }
+
       std::vector<SkinningSession> previous_sessions{};
 
       SkinningCommander commander = SkinningCommander(WAIT_HOURS, previous_sessions);
 
       commander.start_new_session();
-
    } else if (std::string(argv[1]) == "check") {
       std::vector<SkinningSession> previous_sessions = read_sessions_file(FILE_NAME);
 
       SkinningCommander commander = SkinningCommander(WAIT_HOURS, previous_sessions);
 
       commander.calculate_available_breaks();
-
    } else if (std::string(argv[1]) == "resume") {
       std::vector<SkinningSession> previous_sessions = read_sessions_file(FILE_NAME);
 
