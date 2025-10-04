@@ -2,10 +2,10 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
-#include <utility>
 #include <filesystem>
 #include <random>
 
+#include "flag.h"
 #include "utils.h"
 #include "src/FileReadingUtil.h"
 #include "src/SkinningCommander.h"
@@ -18,6 +18,15 @@ int main(int argc, char *argv[]) {
       printf("Incorrect number of commands entered. Put either 'start' or 'check'.\n");
       return 1;
    }
+
+   auto testFlag = flag::stringFlag("test", "abc", "What?! HELP");
+   flag::parse(argc, argv);
+
+
+   printf("%s", testFlag->c_str());
+
+   return 0;
+
 
    const double WAIT_HOURS = 1.0;
 
