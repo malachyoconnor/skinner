@@ -13,22 +13,17 @@
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
-   if (argc != 2) {
+int main(int argc, const char *argv[]) {
+   if (argc == 1) {
       printf("Incorrect number of commands entered. Put either 'start' or 'check'.\n");
       return 1;
    }
 
-   auto testFlag = flag::stringFlag("test", "abc", "What?! HELP");
+   // Command line argument parsing //
+   auto wait_hour_arg = flag::doubleFlag("hours", 1.0, "Average number of hours you want your sessions to be (Floating point)");
    flag::parse(argc, argv);
 
-
-   printf("%s", testFlag->c_str());
-
-   return 0;
-
-
-   const double WAIT_HOURS = 1.0;
+   const double WAIT_HOURS = *wait_hour_arg;
 
    bool file_exists = std::filesystem::exists(FILE_NAME);
 
