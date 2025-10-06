@@ -19,13 +19,11 @@ int main(int argc, const char *argv[]) {
       return 1;
    }
 
-   // Command line argument parsing //
    auto wait_hour_arg = flag::doubleFlag("hours", 1.0,
                                          "Average number of hours you want your sessions to be (Floating point)");
    flag::parse(argc, argv);
 
    const double WAIT_HOURS = *wait_hour_arg;
-   bool file_exists = std::filesystem::exists(FILE_NAME);
 
    auto command = parseCommand(argv[1]);
    if (command == _number_of_commands_) {
@@ -35,7 +33,7 @@ int main(int argc, const char *argv[]) {
    }
 
    if (command == START) {
-      if (file_exists) {
+      if (std::filesystem::exists(FILE_NAME)) {
          PRINT("A session already exists, are you sure you want to start a new one?", RED);
          cin.get();
          PRINT("Are you really sure? If not, enter: `skinner resume`", RED);
@@ -47,9 +45,10 @@ int main(int argc, const char *argv[]) {
       SkinningCommander commander = SkinningCommander(WAIT_HOURS, previous_sessions);
 
       commander.start_new_session();
+
    } else if (command == CHECK) {
       std::vector<SkinningSession> previous_sessions = read_sessions_file(FILE_NAME);
-      if (previous_sessions.back().end_time != -1) {
+      if (previous_sessions.empty() || previous_sessions.back().end_time != -1) {
          PRINT("No session currently running. Start a new session or resume your current one first.", RED);
          exit(EXIT_FAILURE);
       }
@@ -67,6 +66,11 @@ int main(int argc, const char *argv[]) {
    } else if (command == RESUME) {
       std::vector<SkinningSession> previous_sessions = read_sessions_file(FILE_NAME);
 
+      if (previous_sessions.empty()) {
+         PRINT("No session currently running.", RED);
+         exit(EXIT_FAILURE);
+      }
+
       if (previous_sessions.back().end_time == -1) {
          printf("You still have a session in progress\n");
          return 0;
@@ -75,6 +79,35 @@ int main(int argc, const char *argv[]) {
       SkinningCommander commander = SkinningCommander(WAIT_HOURS, previous_sessions);
       commander.start_new_session();
       PRINT("Session resumed 👍", GREEN);
-   }
 
+   } else if (command == STATS) {
+      std::vector<SkinningSession> previous_sessions = read_sessions_file(FILE_NAME);
+      if (previous_sessions.empty()) {
+         PRINT("No session currently running.", RED);
+         exit(EXIT_FAILURE);
+      }
+
+      int work_time = 0;
+      int break_time = 0;
+
+      long break_start_time = previous_sessions[0].start_time;
+
+      for (auto &session: previous_sessions) {
+         if (session.end_time == -1) {
+            session.end_time = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+         }
+
+         break_time += static_cast<int>(session.start_time - break_start_time);
+         work_time += static_cast<int>(session.end_time - session.start_time);
+
+         printf("start&end :%ld %ld\n", session.start_time, session.end_time);
+         printf("break&work: %d %d\n", break_time, work_time);
+
+         break_start_time = session.end_time;
+      }
+
+      printf("Time worked   : %d:%.2d:%.2d \n", work_time / 3600, (work_time % 3600) / 60, work_time % 60);
+      printf("Time in breaks: %d:%.2d:%.2d \n", break_time / 3600, (break_time % 3600) / 60, break_time % 60);
+
+   }
 }

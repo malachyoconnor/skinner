@@ -136,7 +136,7 @@ namespace flag {
       }
    }
 
-   void outputHelpMessageAndExit() {
+   inline void outputHelpMessageAndExit() {
       std::printf("usage: skinner [start | check | resume] [flags]:\n");
 
       if (intFlagsToParse.size() + doubleFlagsToParse.size() +

@@ -1,12 +1,17 @@
 #ifndef SKINNER_FILEREADINGUTIL_H
 #define SKINNER_FILEREADINGUTIL_H
 #include <cassert>
+#include <filesystem>
 #include <fstream>
 
 #include "SkinningSession.h"
 using std::optional;
 
 inline std::vector<SkinningSession> read_sessions_file(const std::string &file_name) {
+   if (!std::filesystem::exists(file_name)) {
+      return {};
+   }
+
    std::ifstream input_stream(file_name);
    assert(input_stream.is_open());
 
