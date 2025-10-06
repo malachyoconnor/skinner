@@ -6,7 +6,7 @@
 
 using std::uniform_real_distribution;
 
-constexpr std::string FILE_NAME = "start.txt";
+constexpr std::string FILE_NAME = "time_log.txt";
 
 class SkinningCommander {
 public:
@@ -21,7 +21,9 @@ public:
 
    void end_session();
 
-   void calculate_available_breaks();
+   int calculate_available_breaks();
+
+   void handle_starting_break();
 
    SkinningCommander() = delete;
 

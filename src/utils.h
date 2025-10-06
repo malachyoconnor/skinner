@@ -1,6 +1,39 @@
 #ifndef SKINNER_UTILS_H
 #define SKINNER_UTILS_H
+#include <algorithm>
 #include <string>
+
+enum Command {
+   START,
+   CHECK,
+   RESUME,
+   _number_of_commands_
+};
+
+inline Command parseCommand(std::string cmd) {
+   std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
+
+   if (cmd == "start") {
+      return START;
+   }
+
+   if (cmd == "check") {
+      return CHECK;
+   }
+
+   if (cmd == "resume") {
+      return RESUME;
+   }
+
+   // TODO: This is nasty and there must be another way.
+   // The few options I can think of are:
+   // 1: Return a std::optional<Command> - this is nasty, too much code for something simple
+   // 2: Have an enum that represents a failure to parse... _number_of_commands_ is pushing it
+   //    for me. FAILED is not a command
+   // 3: Have this function exit the program. This is maybe the nicest, but seems random
+   //    that a command parsing function would quite your program
+   return _number_of_commands_;
+}
 
 enum Colour {
    RED, GREEN
@@ -22,7 +55,7 @@ inline const char *end() {
 }
 
 inline void PRINT(const char *str, Colour col) {
-   printf("%s%s\n%s", start(col), str, end());
+   std::printf("%s%s\n%s", start(col), str, end());
 }
 
 

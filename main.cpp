@@ -20,14 +20,21 @@ int main(int argc, const char *argv[]) {
    }
 
    // Command line argument parsing //
-   auto wait_hour_arg = flag::doubleFlag("hours", 1.0, "Average number of hours you want your sessions to be (Floating point)");
+   auto wait_hour_arg = flag::doubleFlag("hours", 1.0,
+                                         "Average number of hours you want your sessions to be (Floating point)");
    flag::parse(argc, argv);
 
    const double WAIT_HOURS = *wait_hour_arg;
-
    bool file_exists = std::filesystem::exists(FILE_NAME);
 
-   if (std::string(argv[1]) == "start") {
+   auto command = parseCommand(argv[1]);
+   if (command == _number_of_commands_) {
+      const std::string error_message = std::format("Could not parse command: {}", argv[1]);
+      PRINT(error_message.c_str(), RED);
+      flag::outputHelpMessageAndExit();
+   }
+
+   if (command == START) {
       if (file_exists) {
          PRINT("A session already exists, are you sure you want to start a new one?", RED);
          cin.get();
@@ -40,13 +47,24 @@ int main(int argc, const char *argv[]) {
       SkinningCommander commander = SkinningCommander(WAIT_HOURS, previous_sessions);
 
       commander.start_new_session();
-   } else if (std::string(argv[1]) == "check") {
+   } else if (command == CHECK) {
       std::vector<SkinningSession> previous_sessions = read_sessions_file(FILE_NAME);
+      if (previous_sessions.back().end_time != -1) {
+         PRINT("No session currently running. Start a new session or resume your current one first.", RED);
+         exit(EXIT_FAILURE);
+      }
 
       SkinningCommander commander = SkinningCommander(WAIT_HOURS, previous_sessions);
 
-      commander.calculate_available_breaks();
-   } else if (std::string(argv[1]) == "resume") {
+      int breaks_allowed = commander.calculate_available_breaks();
+
+      if (breaks_allowed > 0) {
+         commander.handle_starting_break();
+      } else {
+         PRINT("Get back to work mutant", RED);
+      }
+
+   } else if (command == RESUME) {
       std::vector<SkinningSession> previous_sessions = read_sessions_file(FILE_NAME);
 
       if (previous_sessions.back().end_time == -1) {
@@ -55,7 +73,8 @@ int main(int argc, const char *argv[]) {
       }
 
       SkinningCommander commander = SkinningCommander(WAIT_HOURS, previous_sessions);
-
       commander.start_new_session();
+      PRINT("Session resumed 👍", GREEN);
    }
+
 }

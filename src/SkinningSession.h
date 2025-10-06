@@ -24,11 +24,11 @@ struct SkinningSession {
    void write_session_to_file(std::ofstream &output_stream) const {
       // Pretty printing human-readable time into file
       auto start_time_point = system_clock::from_time_t(start_time) + 1h;
-      string human_readable_time = std::format("{0:%RBST}", start_time_point);
+      string human_readable_time = std::format("{0:%R}", start_time_point);
 
       if (end_time != -1) {
          auto end_time_point = system_clock::from_time_t(end_time) + 1h;
-         human_readable_time += std::format("<-->{0:%RBST}", end_time_point);
+         human_readable_time += std::format("<-->{0:%R}", end_time_point);
       }
 
       output_stream << human_readable_time << " "<< start_time << " " << end_time << " " << breaks_taken

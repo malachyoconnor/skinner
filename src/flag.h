@@ -138,7 +138,13 @@ namespace flag {
 
    void outputHelpMessageAndExit() {
       std::printf("usage: skinner [start | check | resume] [flags]:\n");
-      std::printf("Available flags:\n");
+
+      if (intFlagsToParse.size() + doubleFlagsToParse.size() +
+         stringFlagsToParse.size() + booleanFlagsToParse.size() == 0) {
+         exit(EXIT_SUCCESS);
+      }
+
+         std::printf("Available flags:\n");
 
       for (auto &flag: intFlagsToParse) {
          std::printf("   -%s: %s\n", flag.name.c_str(), flag.helpMessage.c_str());
@@ -153,7 +159,7 @@ namespace flag {
          std::printf("   -%s OR --%s: %s\n", flag.name.c_str(), flag.name.c_str(), flag.helpMessage.c_str());
       }
 
-      exit(0);
+      exit(EXIT_SUCCESS);
    }
 }
 #endif //SKINNER_FLAG_H
