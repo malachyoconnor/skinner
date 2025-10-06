@@ -8,7 +8,16 @@ enum Command {
    CHECK,
    RESUME,
    STATS,
+   FINISH,
    _number_of_commands_
+};
+
+inline std::string COMMAND_LIST[_number_of_commands_] = {
+   "start",
+   "check",
+   "resume",
+   "stats",
+   "finish"
 };
 
 inline Command parseCommand(std::string cmd) {
@@ -28,6 +37,10 @@ inline Command parseCommand(std::string cmd) {
 
    if (cmd == "stats") {
       return STATS;
+   }
+
+   if (cmd == "finish") {
+      return FINISH;
    }
 
    // TODO: This is nasty and there must be another way.

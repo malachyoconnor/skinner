@@ -3,6 +3,9 @@ project(skinner)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# Used for storing finished skinner timesheets
+add_compile_definitions(ARCHIVE_LOCATION="${CMAKE_CURRENT_SOURCE_DIR}/archive/")
+
 add_subdirectory(src)
 enable_testing()
 add_subdirectory(test)

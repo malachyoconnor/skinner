@@ -137,14 +137,22 @@ namespace flag {
    }
 
    inline void outputHelpMessageAndExit() {
-      std::printf("usage: skinner [start | check | resume] [flags]:\n");
+      string all_commands = "";
+      for (auto &command: COMMAND_LIST) {
+         all_commands += command + " | ";
+      }
+      all_commands.pop_back();
+      all_commands.pop_back();
+      all_commands.pop_back();
+
+      std::printf("usage: skinner [%s] [flags]:\n", all_commands.c_str());
 
       if (intFlagsToParse.size() + doubleFlagsToParse.size() +
-         stringFlagsToParse.size() + booleanFlagsToParse.size() == 0) {
+          stringFlagsToParse.size() + booleanFlagsToParse.size() == 0) {
          exit(EXIT_SUCCESS);
       }
 
-         std::printf("Available flags:\n");
+      std::printf("Available flags:\n");
 
       for (auto &flag: intFlagsToParse) {
          std::printf("   -%s: %s\n", flag.name.c_str(), flag.helpMessage.c_str());
