@@ -3,12 +3,12 @@
 #include <algorithm>
 #include <string>
 
-enum Command {
-   START,
-   CHECK,
-   RESUME,
-   STATS,
-   FINISH,
+enum SkinnerCommand {
+   START_NEW_SESSION,
+   CHECK_SESSION,
+   RESUME_SESSION,
+   GET_STATISTICS,
+   FINISH_SESSION,
    _number_of_commands_
 };
 
@@ -20,32 +20,32 @@ inline std::string COMMAND_LIST[_number_of_commands_] = {
    "finish"
 };
 
-inline Command parseCommand(std::string cmd) {
+inline SkinnerCommand parseCommand(std::string cmd) {
    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
 
    if (cmd == "start") {
-      return START;
+      return START_NEW_SESSION;
    }
 
    if (cmd == "check") {
-      return CHECK;
+      return CHECK_SESSION;
    }
 
    if (cmd == "resume") {
-      return RESUME;
+      return RESUME_SESSION;
    }
 
    if (cmd == "stats") {
-      return STATS;
+      return GET_STATISTICS;
    }
 
    if (cmd == "finish") {
-      return FINISH;
+      return FINISH_SESSION;
    }
 
    // TODO: This is nasty and there must be another way.
    // The few options I can think of are:
-   // 1: Return a std::optional<Command> - this is nasty, too much code for something simple
+   // 1: Return a std::optional<SkinnerCommand> - this is nasty, too much code for something simple
    // 2: Have an enum that represents a failure to parse... _number_of_commands_ is pushing it
    //    for me. FAILED is not a command
    // 3: Have this function exit the program. This is maybe the nicest, but seems random

@@ -11,10 +11,10 @@ constexpr std::string FILE_NAME = "time_log.txt";
 
 class SkinningCommander {
 public:
-   explicit
-   SkinningCommander(double average_hours,
-                     SkinningSession* previous_session) : _average_hours(average_hours),
-                                                          _session(*previous_session) {
+   SkinningCommander() = delete;
+   explicit SkinningCommander(double average_hours,
+                              SkinningSession *previous_session) : _average_hours(average_hours),
+                                                                   _session(*previous_session) {
       _distribution = uniform_real_distribution(average_hours * 0.8, average_hours * 1.2);
    }
 
@@ -29,8 +29,6 @@ public:
    bool calculate_session_statistics();
 
    bool archive_time_log_file();
-
-   SkinningCommander() = delete;
 
 private:
    double _average_hours;

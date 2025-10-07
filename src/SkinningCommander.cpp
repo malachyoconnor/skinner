@@ -58,7 +58,7 @@ void SkinningCommander::handle_starting_break() {
    getchar();
 
    atomic_bool break_finished{false};
-   atomic_int break_seconds_remaining{10};
+   atomic_int break_seconds_remaining{10 * 60};
 
    thread new_thread =
          thread([&break_seconds_remaining, &break_finished] {
