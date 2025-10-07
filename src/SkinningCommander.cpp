@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <chrono>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -12,31 +13,31 @@
 using namespace std::chrono;
 using std::string, std::thread, std::printf, std::atomic_bool, std::atomic_int;
 
-void SkinningCommander::start_new_session() {
+void SkinningCommander::start_new_interval() {
    auto seconds_since_epoch = duration_cast<seconds>(system_clock::now().time_since_epoch());
 
-   _previous_sessions.push_back(
-      SkinningSession(seconds_since_epoch.count(), -1, 0)
+   _session.session_log().push_back(
+      SkinningInterval(seconds_since_epoch.count(), -1, 0)
    );
 
-   write_sessions_to_file(_previous_sessions, FILE_NAME);
+   write_session_to_file(_session, FILE_NAME);
 }
 
 void SkinningCommander::end_session() {
-   _previous_sessions.back().end_time = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-   write_sessions_to_file(_previous_sessions, FILE_NAME);
+   _session.session_log().back().end_time = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+   write_session_to_file(_session, FILE_NAME);
 }
 
 int SkinningCommander::calculate_available_breaks() {
-   SkinningSession current_session = _previous_sessions.back();
+   SkinningInterval current_interval = _session.session_log().back();
 
-   system_clock::time_point start_time(seconds(current_session.start_time));
+   system_clock::time_point start_time(seconds(current_interval.start_time));
    auto seconds_since_start = duration_cast<seconds>(system_clock::now() - start_time);
 
    auto seconds_since_last_break = seconds_since_start;
-   std::mt19937 gen(current_session.start_time);
+   std::mt19937 gen(current_interval.start_time);
 
-   int breaks_allowed = -current_session.breaks_taken;
+   int breaks_allowed = -current_interval.breaks_taken;
 
    while (seconds_since_last_break.count() > 0) {
       double generated_hours_to_work = _distribution(gen);
@@ -57,7 +58,7 @@ void SkinningCommander::handle_starting_break() {
    getchar();
 
    atomic_bool break_finished{false};
-   atomic_int break_seconds_remaining{ 10};
+   atomic_int break_seconds_remaining{10};
 
    thread new_thread =
          thread([&break_seconds_remaining, &break_finished] {
@@ -95,6 +96,46 @@ void SkinningCommander::handle_starting_break() {
    break_finished.exchange(true);
    new_thread.join();
 
-   _previous_sessions.back().breaks_taken++;
+   _session.session_log().back().breaks_taken++;
    end_session();
+}
+
+bool SkinningCommander::calculate_session_statistics() {
+   if (_session.session_state() == EMPTY) {
+      PRINT("No session currently running.", RED);
+      return false;
+   }
+
+   int work_time = 0, break_time = 0;
+   long break_start_time = _session.session_log()[0].start_time;
+
+   for (auto &session: _session.session_log()) {
+      if (session.end_time == -1) {
+         session.end_time = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+      }
+
+      break_time += static_cast<int>(session.start_time - break_start_time);
+      work_time += static_cast<int>(session.end_time - session.start_time);
+
+      break_start_time = session.end_time;
+   }
+
+   printf("Time worked   : %d:%.2d:%.2d \n", work_time / 3600, (work_time % 3600) / 60, work_time % 60);
+   printf("Time in breaks: %d:%.2d:%.2d \n", break_time / 3600, (break_time % 3600) / 60, break_time % 60);
+
+   return true;
+}
+
+bool SkinningCommander::archive_time_log_file() {
+   auto now = system_clock::now();
+   string date_string = std::format("{:%Y-%m-%d}", now);
+   const string archival_location = std::format("{}{}.txt", ARCHIVE_LOCATION, date_string);
+
+   if (std::rename(FILE_NAME.c_str(), archival_location.c_str()) < 0) {
+      printf("Error while moving %s to %s\n", FILE_NAME.c_str(), archival_location.c_str());
+      printf("Error: %s", strerror(errno));
+      return false;
+   }
+
+   return true;
 }

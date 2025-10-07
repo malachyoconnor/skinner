@@ -66,7 +66,7 @@ namespace flag {
 
    void outputHelpMessageAndExit();
 
-   inline void parse(int argc, const char *argv[]) {
+   inline void parseFlags(int argc, const char *argv[]) {
       std::map<string, string> name_value_map{};
 
       populateNameValueMap(argc, argv, name_value_map);
