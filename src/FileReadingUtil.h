@@ -7,10 +7,11 @@
 #include "SkinningInterval.h"
 #include "SkinningSession.h"
 using std::optional;
+using std::runtime_error;
 
-inline std::pair<SkinningSession *, bool> read_skinning_session(const std::string &file_name) {
+inline std::pair<SkinningSession *, runtime_error*> read_skinning_session(const std::string &file_name) {
    if (!std::filesystem::exists(file_name)) {
-      return {nullptr, true};
+      return {nullptr, new runtime_error{"File does not exist."}};
    }
 
    std::ifstream input_stream(file_name);
@@ -26,7 +27,7 @@ inline std::pair<SkinningSession *, bool> read_skinning_session(const std::strin
 
    auto resultSession = new SkinningSession(resultSessions);
 
-   return {resultSession, true};
+   return {resultSession, nullptr};
 }
 
 inline void write_session_to_file(const SkinningSession sessions, const std::string &file_name) {

@@ -24,9 +24,13 @@ int main(int argc, const char *argv[]) {
 
    auto wait_hour_arg = flag::doubleFlag("hours", 1.0,
                                          "Average number of hours you want your sessions to be (Floating point)");
+   auto file_name = flag::stringFlag("file", "./time_log.txt",
+                                     "Path to time log file");
+
    flag::parseFlags(argc, argv);
 
    const double INTERVAL_LENGTH_HOURS = *wait_hour_arg;
+   const string FILE_NAME = *file_name;
 
    SkinnerCommand command = parseCommand(argv[1]);
    if (command == _number_of_commands_) {
@@ -46,25 +50,27 @@ int main(int argc, const char *argv[]) {
          }
 
          SkinningSession *new_session = SkinningSession::newSkinningSession();
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, new_session);
+         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, new_session, FILE_NAME);
          commander.start_new_interval();
          PRINT("New session started 👍", GREEN);
          return EXIT_SUCCESS;
       }
 
       case CHECK_SESSION: {
-         auto [current_session, read_successfully] = read_skinning_session(FILE_NAME);
+         auto [current_session, err] = read_skinning_session(FILE_NAME);
 
-         if (!read_successfully || current_session->session_state() != IN_PROGRESS) {
+         if (err || current_session->session_state() != IN_PROGRESS) {
             PRINT("No session currently running. Start a new session or resume your current one first.", RED);
             return EXIT_FAILURE;
          }
 
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session);
+         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
          int breaks_allowed = commander.calculate_available_breaks();
 
          if (breaks_allowed > 0) {
             commander.handle_starting_break();
+            commander.start_new_interval();
+            PRINT("Session resumed 👍", GREEN);
          } else {
             PRINT("Get back to work mutant", RED);
          }
@@ -84,15 +90,19 @@ int main(int argc, const char *argv[]) {
             return EXIT_FAILURE;
          }
 
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session);
+         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
          commander.start_new_interval();
          PRINT("Session resumed 👍", GREEN);
          return EXIT_SUCCESS;
       }
 
       case GET_STATISTICS: {
-         auto [current_session, read_successfully] = read_skinning_session(FILE_NAME);
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session);
+         auto [current_session, reading_error] = read_skinning_session(FILE_NAME);
+         if (reading_error) {
+            PRINT(reading_error->what(), RED);
+            return EXIT_FAILURE;
+         }
+         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
          bool success = commander.calculate_session_statistics();
          return success ? EXIT_SUCCESS : EXIT_FAILURE;
       }
@@ -103,13 +113,13 @@ int main(int argc, const char *argv[]) {
             cin.get();
          }
 
-         auto [current_session, read_successfully] = read_skinning_session(FILE_NAME);
-         if (!read_successfully || current_session->session_state() == EMPTY) {
+         auto [current_session, err] = read_skinning_session(FILE_NAME);
+         if (err || current_session->session_state() == EMPTY) {
             PRINT("No session currently running. Start a new session first.", RED);
             return EXIT_FAILURE;
          }
 
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session);
+         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
          commander.end_session();
 
          bool success = commander.archive_time_log_file();

@@ -16,31 +16,17 @@ inline std::string COMMAND_LIST[_number_of_commands_] = {
    "start",
    "check",
    "resume",
-   "stats",
+   "stat",
    "finish"
 };
 
 inline SkinnerCommand parseCommand(std::string cmd) {
    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
 
-   if (cmd == "start") {
-      return START_NEW_SESSION;
-   }
-
-   if (cmd == "check") {
-      return CHECK_SESSION;
-   }
-
-   if (cmd == "resume") {
-      return RESUME_SESSION;
-   }
-
-   if (cmd == "stats") {
-      return GET_STATISTICS;
-   }
-
-   if (cmd == "finish") {
-      return FINISH_SESSION;
+   for (int i = 0; i < _number_of_commands_; i++) {
+      if (cmd == COMMAND_LIST[i]) {
+         return static_cast<SkinnerCommand>(i);
+      }
    }
 
    // TODO: This is nasty and there must be another way.
@@ -76,5 +62,10 @@ inline void PRINT(const char *str, Colour col) {
    std::printf("%s%s\n%s", start(col), str, end());
 }
 
+inline long get_seconds_since_epoch() {
+   return duration_cast<std::chrono::seconds>(
+      std::chrono::system_clock::now().time_since_epoch()
+   ).count();
+}
 
 #endif //SKINNER_UTILS_H
