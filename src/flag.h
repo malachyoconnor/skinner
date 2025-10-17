@@ -127,7 +127,7 @@ namespace flag {
          string value = argument.substr(argument.find('=') + 1);
 
          if (name_value_map.contains(name)) {
-            PRINT("Flag entered twice: ", RED);
+            PRINTLN("Flag entered twice: ", RED);
             printf("%s\n", name.c_str());
             continue;
          }

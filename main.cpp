@@ -6,6 +6,7 @@
 #include <format>
 #include <filesystem>
 #include <random>
+#include <unistd.h>
 
 #include "flag.h"
 #include "utils.h"
@@ -35,7 +36,7 @@ int main(int argc, const char *argv[]) {
    SkinnerCommand command = parseCommand(argv[1]);
    if (command == _number_of_commands_) {
       const std::string error_message = std::format("Could not parse command: {}", argv[1]);
-      PRINT(error_message.c_str(), RED);
+      PRINTLN(error_message.c_str(), RED);
       flag::outputHelpMessageAndExit();
    }
 
@@ -43,16 +44,16 @@ int main(int argc, const char *argv[]) {
       case START_NEW_SESSION: {
          if (std::filesystem::exists(FILE_NAME)) {
             // TODO: Consider renaming the old one, rather than cruelly deleting it
-            PRINT("A session already exists, are you sure you want to start a new one?", RED);
+            PRINTLN("A session already exists, are you sure you want to start a new one?", RED);
             cin.get();
-            PRINT("Are you really sure? If not, enter: `skinner resume`", RED);
+            PRINTLN("Are you really sure? If not, enter: `skinner resume`", RED);
             cin.get();
          }
 
          SkinningSession *new_session = SkinningSession::newSkinningSession();
          SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, new_session, FILE_NAME);
          commander.start_new_interval();
-         PRINT("New session started 👍", GREEN);
+         PRINTLN("New session started 👍", GREEN);
          return EXIT_SUCCESS;
       }
 
@@ -60,7 +61,7 @@ int main(int argc, const char *argv[]) {
          auto [current_session, err] = read_skinning_session(FILE_NAME);
 
          if (err || current_session->session_state() != IN_PROGRESS) {
-            PRINT("No session currently running. Start a new session or resume your current one first.", RED);
+            PRINTLN("No session currently running. Start a new session or resume your current one first.", RED);
             return EXIT_FAILURE;
          }
 
@@ -70,9 +71,9 @@ int main(int argc, const char *argv[]) {
          if (breaks_allowed > 0) {
             commander.handle_starting_break();
             commander.start_new_interval();
-            PRINT("Session resumed 👍", GREEN);
+            PRINTLN("Session resumed 👍", GREEN);
          } else {
-            PRINT("Get back to work mutant", RED);
+            PRINTLN("Get back to work mutant", RED);
          }
          return EXIT_SUCCESS;
       }
@@ -81,25 +82,25 @@ int main(int argc, const char *argv[]) {
          auto [current_session, read_successfully] = read_skinning_session(FILE_NAME);
 
          if (current_session->session_state() == EMPTY) {
-            PRINT("No session currently running.", RED);
+            PRINTLN("No session currently running.", RED);
             return EXIT_FAILURE;
          }
 
          if (current_session->session_state() == IN_PROGRESS) {
-            PRINT("You still have a session in progress", RED);
+            PRINTLN("You still have a session in progress", RED);
             return EXIT_FAILURE;
          }
 
          SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
          commander.start_new_interval();
-         PRINT("Session resumed 👍", GREEN);
+         PRINTLN("Session resumed 👍", GREEN);
          return EXIT_SUCCESS;
       }
 
       case GET_STATISTICS: {
          auto [current_session, reading_error] = read_skinning_session(FILE_NAME);
          if (reading_error) {
-            PRINT(reading_error->what(), RED);
+            PRINTLN(reading_error->what(), RED);
             return EXIT_FAILURE;
          }
          SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
@@ -109,13 +110,13 @@ int main(int argc, const char *argv[]) {
 
       case FINISH_SESSION: {
          if (std::filesystem::exists(FILE_NAME)) {
-            PRINT("Are you sure you want to finish this session?", RED);
+            PRINTLN("Are you sure you want to finish this session?", RED);
             cin.get();
          }
 
          auto [current_session, err] = read_skinning_session(FILE_NAME);
          if (err || current_session->session_state() == EMPTY) {
-            PRINT("No session currently running. Start a new session first.", RED);
+            PRINTLN("No session currently running. Start a new session first.", RED);
             return EXIT_FAILURE;
          }
 
@@ -126,7 +127,19 @@ int main(int argc, const char *argv[]) {
          return success ? EXIT_SUCCESS : EXIT_FAILURE;
       }
 
-      default:
+      case POLL: {
+         while (true) {
+
+            string msg = std::format("{:%H.%M} - Keep Skinning", system_clock::now());
+            PRINT(msg.c_str(), GREEN);
+            fflush(stdout);
+            sleep(1);
+            printf("\r");
+         }
+         return 0;
+      }
+
+      case _number_of_commands_:
          string error_msg = std::format("We haven't handled this command: {}", argv[1]);
          throw std::logic_error(error_msg);
    }

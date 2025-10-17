@@ -9,6 +9,7 @@ enum SkinnerCommand {
    RESUME_SESSION,
    GET_STATISTICS,
    FINISH_SESSION,
+   POLL,
    _number_of_commands_
 };
 
@@ -17,7 +18,8 @@ inline std::string COMMAND_LIST[_number_of_commands_] = {
    "check",
    "resume",
    "stat",
-   "finish"
+   "finish",
+   "poll"
 };
 
 inline SkinnerCommand parseCommand(std::string cmd) {
@@ -59,6 +61,10 @@ inline const char *end() {
 }
 
 inline void PRINT(const char *str, Colour col) {
+   std::printf("%s%s%s", start(col), str, end());
+}
+
+inline void PRINTLN(const char *str, Colour col) {
    std::printf("%s%s\n%s", start(col), str, end());
 }
 

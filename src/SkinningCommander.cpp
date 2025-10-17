@@ -53,8 +53,8 @@ int SkinningCommander::calculate_available_breaks() {
 }
 
 void SkinningCommander::handle_starting_break() {
-   PRINT("You may have a break", GREEN);
-   PRINT("Should you choose to accept one", GREEN);
+   PRINTLN("You may have a break", GREEN);
+   PRINTLN("Should you choose to accept one", GREEN);
    getchar();
 
    _session.session_log().back().breaks_taken++;
@@ -93,7 +93,7 @@ void SkinningCommander::handle_starting_break() {
 
 bool SkinningCommander::calculate_session_statistics() {
    if (_session.session_state() == EMPTY) {
-      PRINT("No session currently running.", RED);
+      PRINTLN("No session currently running.", RED);
       return false;
    }
 
