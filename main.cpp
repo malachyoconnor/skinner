@@ -11,7 +11,7 @@
 #include "flag.h"
 #include "utils.h"
 #include "FileReadingUtil.h"
-#include "SkinningCommander.h"
+#include "SkinningController.h"
 #include "SkinningSession.h"
 
 using std::cin;
@@ -51,8 +51,8 @@ int main(int argc, const char *argv[]) {
          }
 
          SkinningSession *new_session = SkinningSession::newSkinningSession();
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, new_session, FILE_NAME);
-         commander.start_new_interval();
+         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, new_session, FILE_NAME);
+         controller.start_new_interval();
          PRINTLN("New session started 👍", GREEN);
          return EXIT_SUCCESS;
       }
@@ -65,12 +65,12 @@ int main(int argc, const char *argv[]) {
             return EXIT_FAILURE;
          }
 
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
-         int breaks_allowed = commander.calculate_available_breaks();
+         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
+         int breaks_allowed = controller.calculate_available_breaks();
 
          if (breaks_allowed > 0) {
-            commander.handle_starting_break();
-            commander.start_new_interval();
+            controller.handle_starting_break();
+            controller.start_new_interval();
             PRINTLN("Session resumed 👍", GREEN);
          } else {
             PRINTLN("Get back to work mutant", RED);
@@ -91,8 +91,8 @@ int main(int argc, const char *argv[]) {
             return EXIT_FAILURE;
          }
 
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
-         commander.start_new_interval();
+         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
+         controller.start_new_interval();
          PRINTLN("Session resumed 👍", GREEN);
          return EXIT_SUCCESS;
       }
@@ -103,27 +103,33 @@ int main(int argc, const char *argv[]) {
             PRINTLN(reading_error->what(), RED);
             return EXIT_FAILURE;
          }
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
-         bool success = commander.calculate_session_statistics();
+         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
+         bool success = controller.calculate_session_statistics();
          return success ? EXIT_SUCCESS : EXIT_FAILURE;
       }
 
       case FINISH_SESSION: {
-         if (std::filesystem::exists(FILE_NAME)) {
-            PRINTLN("Are you sure you want to finish this session?", RED);
-            cin.get();
-         }
-
          auto [current_session, err] = read_skinning_session(FILE_NAME);
          if (err || current_session->session_state() == EMPTY) {
             PRINTLN("No session currently running. Start a new session first.", RED);
             return EXIT_FAILURE;
          }
 
-         SkinningCommander commander = SkinningCommander(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
-         commander.end_session();
+         for (auto interval : current_session->get_inteval_list()) {
+            auto start_time = time_point<system_clock>(seconds(interval.start_time));
+            auto end_time = time_point<system_clock>(seconds(interval.end_time));
 
-         bool success = commander.archive_time_log_file();
+            string time_range = std::format("{:%d/%m/%y %H:%M} - {:%d/%m/%y %H:%M}", start_time, end_time);
+            std::printf("%s\n", time_range.c_str());
+         }
+
+         PRINTLN("Are you sure you want to finish this session? Otherwise Ctrl+C", RED);
+         cin.get();
+
+         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
+         controller.end_interval();
+         bool success = controller.archive_time_log_file();
+
          return success ? EXIT_SUCCESS : EXIT_FAILURE;
       }
 

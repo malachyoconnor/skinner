@@ -13,19 +13,19 @@ public:
    SkinningSession() = delete;
 
    explicit SkinningSession(std::vector<SkinningInterval> sessions) {
-      _session_log = std::move(sessions);
+      _interval_list = std::move(sessions);
    }
 
    [[nodiscard]] SessionState session_state() const {
       return calculate_session_state();
    }
 
-   [[nodiscard]] std::vector<SkinningInterval> &session_log() {
-      return _session_log;
+   [[nodiscard]] std::vector<SkinningInterval> &get_inteval_list() {
+      return _interval_list;
    }
 
-   [[nodiscard]] std::vector<SkinningInterval> session_log() const {
-      return _session_log;
+   [[nodiscard]] std::vector<SkinningInterval> get_inteval_list() const {
+      return _interval_list;
    }
 
    static SkinningSession *newSkinningSession() {
@@ -36,19 +36,19 @@ public:
 private:
 
    [[nodiscard]] SessionState calculate_session_state() const {
-      if (_session_log.empty())
+      if (_interval_list.empty())
          return EMPTY;
 
-      if (_session_log.back().end_time != -1)
+      if (_interval_list.back().end_time != -1)
          return PAUSED;
 
-      if (_session_log.back().end_time == -1)
+      if (_interval_list.back().end_time == -1)
          return IN_PROGRESS;
 
       throw std::logic_error("Session state could not be calculated!");
    }
 
-   std::vector<SkinningInterval> _session_log;
+   std::vector<SkinningInterval> _interval_list;
 };
 
 #endif

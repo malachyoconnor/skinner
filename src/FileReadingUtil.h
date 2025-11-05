@@ -30,12 +30,12 @@ inline std::pair<SkinningSession *, runtime_error*> read_skinning_session(const 
    return {resultSession, nullptr};
 }
 
-inline void write_session_to_file(const SkinningSession sessions, const std::string &file_name) {
+inline void write_session_to_file(const SkinningSession& session, const std::string &file_name) {
    std::ofstream output_stream(file_name);
    assert(output_stream.is_open());
 
-   for (const auto &session: sessions.session_log()) {
-      session.write_interval_to_file(output_stream);
+   for (const auto &interval: session.get_inteval_list()) {
+      interval.write_interval_to_file(output_stream);
    }
 }
 

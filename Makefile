@@ -1,8 +1,8 @@
 DEFINE_VARS = ARCHIVE_LOCATION='"$(shell pwd)/archive/"'
 
-all: commander.s
-	g++ -std=c++23 main.cpp commander.s -D $(DEFINE_VARS) -I ./src -o skinner
-	rm ./commander.s
+all: controller.s
+	g++ -std=c++23 main.cpp controller.s -D $(DEFINE_VARS) -I ./src -o skinner
+	rm ./controller.s
 
-commander.s:
-	g++ -std=c++23 ./src/SkinningCommander.cpp -D $(DEFINE_VARS) -S -o commander.s
+controller.s:
+	g++ -std=c++23 ./src/Skinningcontroller.cpp -D $(DEFINE_VARS) -S -o controller.s
