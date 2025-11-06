@@ -16,10 +16,14 @@
 
 using std::cin;
 using std::printf;
+using colours::PRINT, colours::PRINTLN;
+using enum colours::Colour;
 
 int main(int argc, const char *argv[]) {
    if (argc == 1) {
-      printf("Incorrect number of commands entered. Put either 'start' or 'check'.\n");
+      PRINTLN("Incorrect number of commands entered.", RED);
+      flag::outputHelpMessageAndExit();
+
       return EXIT_FAILURE;
    }
 
@@ -115,7 +119,7 @@ int main(int argc, const char *argv[]) {
             return EXIT_FAILURE;
          }
 
-         for (auto interval : current_session->get_inteval_list()) {
+         for (auto interval: current_session->get_inteval_list()) {
             auto start_time = time_point<system_clock>(seconds(interval.start_time));
             auto end_time = time_point<system_clock>(seconds(interval.end_time));
 

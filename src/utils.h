@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <string>
 
+#include "SkinningInterval.h"
+
 enum SkinnerCommand {
    START_NEW_SESSION,
    CHECK_SESSION,
@@ -41,37 +43,47 @@ inline SkinnerCommand parseCommand(std::string cmd) {
    return _number_of_commands_;
 }
 
-enum Colour {
-   RED, GREEN
-};
-
-#define START_COLOUR "\033["
-
-inline const char *start(Colour col) {
-   switch (col) {
-      case RED: return START_COLOUR "31m";
-      case GREEN: return START_COLOUR "32m";
-   }
-
-   __builtin_unreachable();
-}
-
-inline const char *end() {
-   return "\033[0m";
-}
-
-inline void PRINT(const char *str, Colour col) {
-   std::printf("%s%s%s", start(col), str, end());
-}
-
-inline void PRINTLN(const char *str, Colour col) {
-   std::printf("%s%s\n%s", start(col), str, end());
-}
-
 inline long get_seconds_since_epoch() {
+
    return duration_cast<std::chrono::seconds>(
       std::chrono::system_clock::now().time_since_epoch()
    ).count();
+}
+
+inline std::string get_human_readable_time(std::chrono::system_clock::time_point tp) {
+   auto utc_offset = std::chrono::current_zone()->get_info(tp).offset;
+
+   std::string human_readable_time = std::format("{0:%R}", tp + utc_offset);
+   return human_readable_time;
+}
+
+namespace colours {
+   enum Colour {
+      RED, GREEN
+   };
+
+#define START_COLOUR "\033["
+
+   inline const char *start(Colour col) {
+      switch (col) {
+         case RED: return START_COLOUR "31m";
+         case GREEN: return START_COLOUR "32m";
+      }
+
+      __builtin_unreachable();
+   }
+
+   inline const char *end() {
+      return "\033[0m";
+   }
+
+   inline void PRINT(const char *str, Colour col) {
+      std::printf("%s%s%s", start(col), str, end());
+   }
+
+   inline void PRINTLN(const char *str, Colour col) {
+      std::printf("%s%s\n%s", start(col), str, end());
+   }
 }
 
 #endif //SKINNER_UTILS_H

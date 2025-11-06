@@ -6,6 +6,9 @@
 
 #include "utils.h"
 
+using colours::PRINTLN;
+using enum colours::Colour;
+
 // --flag
 // -flag
 // -flag=x

@@ -2,6 +2,7 @@ add_library(src_library
         SkinningController.cpp
         SkinningController.h
         SkinningSession.h
+        SkinningInterval.cpp
         SkinningInterval.h
         FileReadingUtil.h
         utils.h

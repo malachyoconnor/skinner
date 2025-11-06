@@ -12,6 +12,8 @@
 
 using namespace std::chrono;
 using std::string, std::thread, std::printf, std::atomic_bool, std::atomic_int;
+using colours::PRINT, colours::PRINTLN;
+using enum colours::Colour;
 
 void SkinningController::start_new_interval() {
    auto seconds_since_epoch = seconds(get_seconds_since_epoch());
