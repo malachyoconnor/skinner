@@ -20,11 +20,15 @@ public:
       return calculate_session_state();
    }
 
-   [[nodiscard]] std::vector<SkinningInterval> &get_inteval_list() {
+   [[nodiscard]] std::size_t get_num_intervals() const {
+      return _interval_list.size();
+   }
+
+   [[nodiscard]] std::vector<SkinningInterval>& get_interval_list() {
       return _interval_list;
    }
 
-   [[nodiscard]] std::vector<SkinningInterval> get_inteval_list() const {
+   [[nodiscard]] std::vector<SkinningInterval> get_interval_list() const {
       return _interval_list;
    }
 
@@ -34,7 +38,6 @@ public:
    }
 
 private:
-
    [[nodiscard]] SessionState calculate_session_state() const {
       if (_interval_list.empty())
          return EMPTY;

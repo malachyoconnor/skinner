@@ -62,7 +62,7 @@ int main(int argc, const char *argv[]) {
       }
 
       case CHECK_SESSION: {
-         auto [current_session, err] = read_skinning_session(FILE_NAME);
+         auto [current_session, err] = read_session_from_file(FILE_NAME);
 
          if (err || current_session->session_state() != IN_PROGRESS) {
             PRINTLN("No session currently running. Start a new session or resume your current one first.", RED);
@@ -75,7 +75,7 @@ int main(int argc, const char *argv[]) {
          if (breaks_allowed > 0) {
             controller.handle_starting_break();
             controller.start_new_interval();
-            PRINTLN("Session resumed 👍", GREEN);
+         PRINTLN("Session resumed 👍", GREEN);
          } else {
             PRINTLN("Get back to work mutant", RED);
          }
@@ -83,7 +83,7 @@ int main(int argc, const char *argv[]) {
       }
 
       case RESUME_SESSION: {
-         auto [current_session, read_successfully] = read_skinning_session(FILE_NAME);
+         auto [current_session, read_successfully] = read_session_from_file(FILE_NAME);
 
          if (current_session->session_state() == EMPTY) {
             PRINTLN("No session currently running.", RED);
@@ -102,7 +102,7 @@ int main(int argc, const char *argv[]) {
       }
 
       case GET_STATISTICS: {
-         auto [current_session, reading_error] = read_skinning_session(FILE_NAME);
+         auto [current_session, reading_error] = read_session_from_file(FILE_NAME);
          if (reading_error) {
             PRINTLN(reading_error->what(), RED);
             return EXIT_FAILURE;
@@ -113,13 +113,13 @@ int main(int argc, const char *argv[]) {
       }
 
       case FINISH_SESSION: {
-         auto [current_session, err] = read_skinning_session(FILE_NAME);
+         auto [current_session, err] = read_session_from_file(FILE_NAME);
          if (err || current_session->session_state() == EMPTY) {
             PRINTLN("No session currently running. Start a new session first.", RED);
             return EXIT_FAILURE;
          }
 
-         for (auto interval: current_session->get_inteval_list()) {
+         for (auto interval: current_session->get_interval_list()) {
             auto start_time = time_point<system_clock>(seconds(interval.start_time));
             auto end_time = time_point<system_clock>(seconds(interval.end_time == -1 ? get_seconds_since_epoch() : interval.end_time));
 

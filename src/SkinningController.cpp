@@ -16,9 +16,12 @@ using colours::PRINT, colours::PRINTLN;
 using enum colours::Colour;
 
 void SkinningController::start_new_interval() {
-   auto seconds_since_epoch = seconds(get_seconds_since_epoch());
+   std::vector<SkinningInterval>& interval_list = _session.get_interval_list();
+   assert((interval_list.size() == 0 || _session.get_interval_list().back().end_time != -1)
+      && "Trying to start a new interval when the previous hasn't finished!");
 
-   _session.get_inteval_list().push_back(
+   auto seconds_since_epoch = seconds(get_seconds_since_epoch());
+   interval_list.push_back(
       SkinningInterval(seconds_since_epoch.count(), -1, 0)
    );
 
@@ -26,15 +29,15 @@ void SkinningController::start_new_interval() {
 }
 
 void SkinningController::end_interval() {
-   auto final_interval = _session.get_inteval_list().back();
-   assert(final_interval.end_time <= 0);
+   SkinningInterval& final_interval = _session.get_interval_list().back();
+   assert(final_interval.end_time == -1 && "Attempting to end an already finished interval");
 
-   final_interval.end_time = get_seconds_since_epoch();
+   final_interval.end_time = std::max(get_seconds_since_epoch(), final_interval.start_time);
    write_session_to_file(_session, _file_name);
 }
 
 int SkinningController::calculate_available_breaks() {
-   SkinningInterval current_interval = _session.get_inteval_list().back();
+   SkinningInterval current_interval = _session.get_interval_list().back();
 
    system_clock::time_point start_time(seconds(current_interval.start_time));
    auto seconds_since_start = duration_cast<seconds>(system_clock::now() - start_time);
@@ -62,7 +65,7 @@ void SkinningController::handle_starting_break() {
    PRINTLN("Should you choose to accept one", GREEN);
    getchar();
 
-   _session.get_inteval_list().back().breaks_taken++;
+   _session.get_interval_list().back().breaks_taken++;
    end_interval();
 
    atomic_bool break_finished{false};
@@ -103,9 +106,9 @@ bool SkinningController::calculate_session_statistics() {
    }
 
    long work_time = 0, break_time = 0;
-   long break_start_time = _session.get_inteval_list()[0].start_time;
+   long break_start_time = _session.get_interval_list()[0].start_time;
 
-   for (auto &interval: _session.get_inteval_list()) {
+   for (auto &interval: _session.get_interval_list()) {
       if (interval.end_time == -1) {
          interval.end_time = get_seconds_since_epoch();
       }
@@ -123,7 +126,7 @@ bool SkinningController::calculate_session_statistics() {
 }
 
 bool SkinningController::archive_time_log_file() {
-   auto start_time = time_point<system_clock>(seconds(_session.get_inteval_list()[0].start_time));
+   auto start_time = time_point<system_clock>(seconds(_session.get_interval_list()[0].start_time));
    string date_string = std::format("{:%Y-%m-%d}", start_time);
    const string archival_location = std::format("{}{}.txt", ARCHIVE_LOCATION, date_string);
 

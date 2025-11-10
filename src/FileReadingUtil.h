@@ -9,7 +9,8 @@
 using std::optional;
 using std::runtime_error;
 
-inline std::pair<SkinningSession *, runtime_error*> read_skinning_session(const std::string &file_name) {
+[[nodiscard]]
+inline std::pair<SkinningSession *, runtime_error*> read_session_from_file(const std::string &file_name) {
    if (!std::filesystem::exists(file_name)) {
       return {nullptr, new runtime_error{"File does not exist."}};
    }
@@ -34,7 +35,7 @@ inline void write_session_to_file(const SkinningSession& session, const std::str
    std::ofstream output_stream(file_name);
    assert(output_stream.is_open());
 
-   for (const auto &interval: session.get_inteval_list()) {
+   for (const auto &interval: session.get_interval_list()) {
       interval.write_interval_to_file(output_stream);
    }
 }

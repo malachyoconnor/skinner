@@ -11,25 +11,17 @@ FetchContent_MakeAvailable(googletest)
 add_compile_definitions(SKINNER_EXECUTABLE="${PROJECT_SOURCE_DIR}/build/skinner")
 
 # This is normal, create an executable
-add_executable(test_flag_library flag_test.cpp)
+add_executable(TEST_EXECUTABLE flag_test.cpp integration_test.cpp test_util.h SkinningController_test.cpp)
 
 # Give our tests access to the gtest headers
 target_link_libraries(
-        test_flag_library
+        TEST_EXECUTABLE
         PRIVATE
         flag
-        GTest::gtest_main
-)
-
-add_executable(integration_test_library integration_test.cpp)
-
-target_link_libraries(
-        integration_test_library
-        PRIVATE
         src_library
         GTest::gtest_main
 )
 
 # This allows cmake to use googleTest commands - and discovering those tests is one of them
 include(GoogleTest)
-gtest_discover_tests(test_flag_library)
+gtest_discover_tests(TEST_EXECUTABLE)

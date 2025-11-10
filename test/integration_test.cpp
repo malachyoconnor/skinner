@@ -7,8 +7,7 @@
 #include "SkinningController.h"
 #include "SkinningSession.h"
 #include "utils.h"
-
-constexpr long ONE_HOUR = 3600;
+#include "test_util.h"
 
 std::string exec(std::string &cmd) {
    FILE *pipe = popen(cmd.c_str(), "r");
@@ -28,12 +27,6 @@ std::string exec(std::string &cmd) {
    return result;
 }
 
-static SkinningInterval get_interval(long start, long end) {
-   return {
-      start, end, 0
-   };
-}
-
 TEST(STAT, StraightForwardStats) {
 
    auto current_time = get_seconds_since_epoch();
@@ -41,15 +34,12 @@ TEST(STAT, StraightForwardStats) {
    std::vector<SkinningInterval> intervals = {
       get_interval(current_time, current_time + ONE_HOUR),
       get_interval(current_time + ONE_HOUR, current_time + 2*ONE_HOUR)
-
    };
 
-
    SkinningSession new_session = SkinningSession(intervals);
-   SkinningController controller = SkinningController(0, &new_session, "time_log.txt");
-   write_session_to_file(new_session, "time_log.txt");
+   SkinningController controller = SkinningController(0, &new_session, TEST_FILE_NAME);
+   write_session_to_file(new_session, TEST_FILE_NAME);
 
    std::string cmd1 = std::format("{} stat -file=time_log.txt", SKINNER_EXECUTABLE);
    std::cout << exec(cmd1);
-
 }
