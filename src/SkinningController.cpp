@@ -26,7 +26,10 @@ void SkinningController::start_new_interval() {
 }
 
 void SkinningController::end_interval() {
-   _session.get_inteval_list().back().end_time = get_seconds_since_epoch();
+   auto final_interval = _session.get_inteval_list().back();
+   assert(final_interval.end_time <= 0);
+
+   final_interval.end_time = get_seconds_since_epoch();
    write_session_to_file(_session, _file_name);
 }
 
@@ -99,22 +102,22 @@ bool SkinningController::calculate_session_statistics() {
       return false;
    }
 
-   int work_time = 0, break_time = 0;
+   long work_time = 0, break_time = 0;
    long break_start_time = _session.get_inteval_list()[0].start_time;
 
-   for (auto &session: _session.get_inteval_list()) {
-      if (session.end_time == -1) {
-         session.end_time = get_seconds_since_epoch();
+   for (auto &interval: _session.get_inteval_list()) {
+      if (interval.end_time == -1) {
+         interval.end_time = get_seconds_since_epoch();
       }
 
-      break_time += static_cast<int>(session.start_time - break_start_time);
-      work_time += static_cast<int>(session.end_time - session.start_time);
+      break_time += interval.start_time - break_start_time;
+      work_time += interval.end_time - interval.start_time;
 
-      break_start_time = session.end_time;
+      break_start_time = interval.end_time;
    }
 
-   printf("Time worked   : %d:%.2d:%.2d \n", work_time / 3600, (work_time % 3600) / 60, work_time % 60);
-   printf("Time in breaks: %d:%.2d:%.2d \n", break_time / 3600, (break_time % 3600) / 60, break_time % 60);
+   printf("Time worked   : %ld:%.2ld:%.2ld \n", work_time / 3600, (work_time % 3600) / 60, work_time % 60);
+   printf("Time in breaks: %ld:%.2ld:%.2ld \n", break_time / 3600, (break_time % 3600) / 60, break_time % 60);
 
    return true;
 }

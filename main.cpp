@@ -121,7 +121,7 @@ int main(int argc, const char *argv[]) {
 
          for (auto interval: current_session->get_inteval_list()) {
             auto start_time = time_point<system_clock>(seconds(interval.start_time));
-            auto end_time = time_point<system_clock>(seconds(interval.end_time));
+            auto end_time = time_point<system_clock>(seconds(interval.end_time == -1 ? get_seconds_since_epoch() : interval.end_time));
 
             string time_range = std::format("{:%d/%m/%y %H:%M} - {:%d/%m/%y %H:%M}", start_time, end_time);
             std::printf("%s\n", time_range.c_str());

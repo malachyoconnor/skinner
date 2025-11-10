@@ -8,6 +8,8 @@ FetchContent_Declare(
 # This basically unzips it
 FetchContent_MakeAvailable(googletest)
 
+add_compile_definitions(SKINNER_EXECUTABLE="${PROJECT_SOURCE_DIR}/build/skinner")
+
 # This is normal, create an executable
 add_executable(test_flag_library flag_test.cpp)
 
@@ -16,6 +18,15 @@ target_link_libraries(
         test_flag_library
         PRIVATE
         flag
+        GTest::gtest_main
+)
+
+add_executable(integration_test_library integration_test.cpp)
+
+target_link_libraries(
+        integration_test_library
+        PRIVATE
+        src_library
         GTest::gtest_main
 )
 
