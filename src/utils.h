@@ -12,6 +12,7 @@ enum SkinnerCommand {
    GET_STATISTICS,
    FINISH_SESSION,
    POLL,
+   VISUALISE,
    _number_of_commands_
 };
 
@@ -21,7 +22,8 @@ inline std::string COMMAND_LIST[_number_of_commands_] = {
    "resume",
    "stat",
    "finish",
-   "poll"
+   "poll",
+   "visualise"
 };
 
 inline SkinnerCommand parseCommand(std::string cmd) {
@@ -59,15 +61,15 @@ inline std::string get_human_readable_time(std::chrono::system_clock::time_point
 
 namespace colours {
    enum Colour {
-      RED, GREEN
+      Red, Green
    };
 
 #define START_COLOUR "\033["
 
    inline const char *start(Colour col) {
       switch (col) {
-         case RED: return START_COLOUR "31m";
-         case GREEN: return START_COLOUR "32m";
+         case Red: return START_COLOUR "31m";
+         case Green: return START_COLOUR "32m";
       }
 
       __builtin_unreachable();

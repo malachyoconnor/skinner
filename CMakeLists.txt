@@ -12,5 +12,6 @@ enable_testing()
 add_subdirectory(test)
 
 add_executable(skinner main.cpp)
+target_link_libraries(src_library PUBLIC raylib)
 target_link_libraries(skinner PRIVATE src_library raylib)
 target_compile_options(skinner PUBLIC -Werror=switch)

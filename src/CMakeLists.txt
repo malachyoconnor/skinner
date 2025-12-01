@@ -6,6 +6,8 @@ add_library(src_library
         SkinningInterval.h
         FileReadingUtil.h
         utils.h
+        WorkVisualiser.cpp
+        WorkVisualiser.h
 )
 
 target_include_directories(src_library

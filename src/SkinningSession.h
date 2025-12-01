@@ -2,6 +2,9 @@
 #define SKINNER_SKINNINGSESSIONLOG_H
 #include <chrono>
 
+#include "SkinningInterval.h"
+#include "utils.h"
+
 enum SessionState {
    EMPTY,
    PAUSED,
@@ -35,6 +38,36 @@ public:
    static SkinningSession *newSkinningSession() {
       std::vector<SkinningInterval> empty_session_log{};
       return new SkinningSession(empty_session_log);
+   }
+
+   long CalculateTotalWorkTime() const {
+      long work_time = 0;
+
+      for (SkinningInterval interval: get_interval_list()) {
+         if (interval.end_time == -1) {
+            interval.end_time = get_seconds_since_epoch();
+         }
+
+         work_time += interval.end_time - interval.start_time;
+      }
+
+      return work_time;
+   }
+
+   long CalculateTotalBreakTime() const {
+      long break_time = 0;
+      long break_start_time = get_interval_list().front().start_time;
+
+      for (SkinningInterval interval: get_interval_list()) {
+         if (interval.end_time == -1) {
+            interval.end_time = get_seconds_since_epoch();
+         }
+
+         break_time += interval.start_time - break_start_time;
+         break_start_time = interval.end_time;
+      }
+
+      return break_time;
    }
 
 private:

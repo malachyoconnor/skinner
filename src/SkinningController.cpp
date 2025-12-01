@@ -16,7 +16,7 @@ using colours::PRINT, colours::PRINTLN;
 using enum colours::Colour;
 
 void SkinningController::start_new_interval() {
-   std::vector<SkinningInterval>& interval_list = _session.get_interval_list();
+   std::vector<SkinningInterval> &interval_list = _session.get_interval_list();
    assert((interval_list.size() == 0 || _session.get_interval_list().back().end_time != -1)
       && "Trying to start a new interval when the previous hasn't finished!");
 
@@ -29,7 +29,7 @@ void SkinningController::start_new_interval() {
 }
 
 void SkinningController::end_interval() {
-   SkinningInterval& final_interval = _session.get_interval_list().back();
+   SkinningInterval &final_interval = _session.get_interval_list().back();
    assert(final_interval.end_time == -1 && "Attempting to end an already finished interval");
 
    final_interval.end_time = std::max(get_seconds_since_epoch(), final_interval.start_time);
@@ -61,8 +61,8 @@ int SkinningController::calculate_available_breaks() {
 }
 
 void SkinningController::handle_starting_break() {
-   PRINTLN("You may have a break", GREEN);
-   PRINTLN("Should you choose to accept one", GREEN);
+   PRINTLN("You may have a break", Green);
+   PRINTLN("Should you choose to accept one", Green);
    getchar();
 
    _session.get_interval_list().back().breaks_taken++;
@@ -101,23 +101,12 @@ void SkinningController::handle_starting_break() {
 
 bool SkinningController::calculate_session_statistics() {
    if (_session.session_state() == EMPTY) {
-      PRINTLN("No session currently running.", RED);
+      PRINTLN("No session currently running.", Red);
       return false;
    }
 
-   long work_time = 0, break_time = 0;
-   long break_start_time = _session.get_interval_list()[0].start_time;
-
-   for (auto &interval: _session.get_interval_list()) {
-      if (interval.end_time == -1) {
-         interval.end_time = get_seconds_since_epoch();
-      }
-
-      break_time += interval.start_time - break_start_time;
-      work_time += interval.end_time - interval.start_time;
-
-      break_start_time = interval.end_time;
-   }
+   long work_time = _session.CalculateTotalWorkTime();
+   long break_time = _session.CalculateTotalBreakTime();
 
    printf("Time worked   : %ld:%.2ld:%.2ld \n", work_time / 3600, (work_time % 3600) / 60, work_time % 60);
    printf("Time in breaks: %ld:%.2ld:%.2ld \n", break_time / 3600, (break_time % 3600) / 60, break_time % 60);
