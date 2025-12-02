@@ -27,17 +27,23 @@ public:
          std::exit(1);
       }
 
+
+      std::chrono::sys_days first_day = all_sessions_and_dates.front().second;
+      std::chrono::sys_days last_day = all_sessions_and_dates.back().second;
+      const int numberOfBars = static_cast<int>((last_day - first_day).count() + 1);
+
       while (!Raylib::WindowShouldClose()) {
          Raylib::BeginDrawing();
          Raylib::ClearBackground(Raylib::RayWhite);
-         DrawBarGraph();
-         DrawAllText();
+         DrawBarGraph(numberOfBars);
+         DrawAllText(numberOfBars);
          Raylib::EndDrawing();
       }
    }
 
-   void DrawBarGraph();
-   void DrawAllText();
+   void DrawBarGraph(int numberOfBars);
+   void DrawSingleBar(int barIndex, int numberOfBars, Raylib::Color color);
+   void DrawAllText(int numberOfBars);
 
    ~WorkVisualiser() {
       Raylib::CloseWindow();
@@ -45,13 +51,19 @@ public:
 
 private:
    void DrawStatsText();
-   void DrawHoverText();
+   void DrawHover(int numberOfBars);
+   static bool MouseInsideGraph();
+   std::optional<SkinningSession> GetSessionFromBarIndex(int barIndex);
 
    std::vector<std::pair<SkinningSession, std::chrono::year_month_day> > all_sessions_and_dates{};
-   std::runtime_error* LoadArchivedSessions();
+   std::runtime_error *LoadArchivedSessions();
 
    static constexpr int CHART_WIDTH = SCREEN_WIDTH - 20;
    static constexpr int CHART_HEIGHT = SCREEN_HEIGHT - 100;
+   static constexpr int BAR_WIDTH = 5;
+   static constexpr int AXIS_WIDTH = 5;
+
+   static constexpr int BAR_HEIGHT_PER_HOUR_WORKED = CHART_HEIGHT / 12;
 };
 
 

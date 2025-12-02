@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <ranges>
 
 #include "FileReadingUtil.h"
 
@@ -40,51 +41,43 @@ runtime_error *WorkVisualiser::LoadArchivedSessions() {
    return nullptr;
 }
 
-void WorkVisualiser::DrawBarGraph() {
-   constexpr int BAR_WIDTH = 5;
+void WorkVisualiser::DrawBarGraph(int numberOfBars) {
+   Raylib::DrawRectangle(10, 10, AXIS_WIDTH, CHART_HEIGHT - 20, Raylib::Black);
+   Raylib::DrawRectangle(10, CHART_HEIGHT - 10, CHART_WIDTH, AXIS_WIDTH, Raylib::Black);
 
-   Raylib::DrawRectangle(10, 10, BAR_WIDTH, CHART_HEIGHT - 20, Raylib::Black);
-   Raylib::DrawRectangle(10, CHART_HEIGHT - 10, CHART_WIDTH, BAR_WIDTH, Raylib::Black);
+   for (int barIndex = 0; barIndex < numberOfBars; barIndex++) {
+      if (!GetSessionFromBarIndex(barIndex)) continue;
 
-   std::chrono::sys_days first_day = all_sessions_and_dates.front().second;
-   std::chrono::sys_days last_day = all_sessions_and_dates.back().second;
-
-   const int number_of_bars = (last_day - first_day).count() + 1;
-
-   const int BAR_GAP = (CHART_WIDTH - BAR_WIDTH * number_of_bars) / (number_of_bars - 1);
-
-   const int firstBarX = 10 + 5 + BAR_GAP;
-   constexpr int firstBarY = CHART_HEIGHT - 10;
-
-   constexpr int barHeightPerHour = CHART_HEIGHT / 12;
-
-   for (auto [session, date]: all_sessions_and_dates) {
-
-      int bar_index = (std::chrono::sys_days(date) - first_day).count();
-      const int barX = firstBarX + bar_index * (BAR_WIDTH + BAR_GAP);
-
-      const auto hoursWorked = session.CalculateTotalWorkTime() / 3600;
-      assert(hoursWorked < 12 && "You worked more than 12 hours???");
-
-      const int barHeight = barHeightPerHour * hoursWorked;
-
-      Raylib::DrawRectangle(barX, firstBarY - barHeight, BAR_WIDTH, barHeight, Raylib::Red);
+      DrawSingleBar(barIndex, numberOfBars, Raylib::Red);
    }
 }
 
-void WorkVisualiser::DrawAllText() {
+void WorkVisualiser::DrawSingleBar(int barIndex, int numberOfBars, Raylib::Color color) {
+   const int BAR_GAP = (CHART_WIDTH - BAR_WIDTH * numberOfBars) / (numberOfBars - 1);
+   const int barX = 10 + AXIS_WIDTH + BAR_GAP + barIndex * (BAR_WIDTH + BAR_GAP);
+   constexpr int firstBarY = CHART_HEIGHT - 10;
+
+   SkinningSession session = GetSessionFromBarIndex(barIndex).value();
+   const auto hoursWorked = session.CalculateTotalWorkTime() / 3600;
+   assert(hoursWorked < 12 && "You worked more than 12 hours???");
+   const int barHeight = BAR_HEIGHT_PER_HOUR_WORKED * hoursWorked;
+
+   Raylib::DrawRectangle(barX, firstBarY - barHeight, BAR_WIDTH, barHeight, color);
+}
+
+void WorkVisualiser::DrawAllText(int numberOfBars) {
    DrawStatsText();
+   DrawHover(numberOfBars);
 }
 
 void WorkVisualiser::DrawStatsText() {
-
-   Raylib::DrawRectangle(10, CHART_HEIGHT + 10, CHART_WIDTH, SCREEN_HEIGHT - CHART_HEIGHT - 20, Raylib::Gray);
-
    double totalHoursWorked = 0;
    double totalIntervals = 0;
    int number_of_sessions = all_sessions_and_dates.size();
 
-   for (auto [session, _]: all_sessions_and_dates) {
+   Raylib::DrawRectangle(10, CHART_HEIGHT + 10, CHART_WIDTH, SCREEN_HEIGHT - CHART_HEIGHT - 20, Raylib::Gray);
+
+   for (const auto &session: all_sessions_and_dates | std::views::keys) {
       totalHoursWorked += session.CalculateTotalWorkTime() / 3600.0;
       totalIntervals += session.get_num_intervals();
    }
@@ -98,6 +91,66 @@ void WorkVisualiser::DrawStatsText() {
 
 }
 
-void WorkVisualiser::DrawHoverText() {
+void WorkVisualiser::DrawHover(int numberOfBars) {
+   if (!MouseInsideGraph()) return;
 
+   const int BAR_GAP = (CHART_WIDTH - BAR_WIDTH * numberOfBars) / (numberOfBars - 1);
+   const int mouseX = Raylib::GetMouseX();
+   const int mouseY = Raylib::GetMouseY();
+
+   const int ChartX = 10 + AXIS_WIDTH;
+   const bool mouseOnABar = ((mouseX - ChartX) % (BAR_GAP + BAR_WIDTH)) > (BAR_GAP / 2);
+   if (!mouseOnABar) return;
+
+   const int barIndex = (mouseX - ChartX) / (BAR_GAP + BAR_WIDTH);
+   if (!GetSessionFromBarIndex(barIndex)) return;
+
+   DrawSingleBar(barIndex, numberOfBars, Raylib::Blue);
+
+   SkinningSession session = GetSessionFromBarIndex(barIndex).value();
+   const std::string workText = std::format("Worked for {:.2} hours",
+                                            static_cast<double>(session.CalculateTotalWorkTime()) / 3600.0);
+   const std::string breakText = std::format("Relaxed for {:.2} hours",
+                                             static_cast<double>(session.CalculateTotalBreakTime()) / 3600.0);
+
+   constexpr int boxPadding = 10;
+   constexpr int fontSize = 25;
+
+   constexpr int boxHeight = boxPadding * 2 + fontSize * 2;
+   const int boxWidth = boxPadding * 2 + std::max(Raylib::MeasureText(workText.c_str(), fontSize),
+                                                  Raylib::MeasureText(breakText.c_str(), fontSize));
+
+   int boxX = mouseX + 10;
+
+   if (boxX + boxWidth > SCREEN_WIDTH) {
+      boxX = SCREEN_WIDTH - boxWidth - 5;
+   }
+
+   int textX = boxX + boxPadding;
+
+   Raylib::DrawRectangle(boxX, mouseY + 10, boxWidth, boxHeight, GRAY);
+
+   Raylib::DrawText(workText.c_str(), textX, mouseY + 10 + boxPadding, fontSize, Raylib::Black);
+   Raylib::DrawText(breakText.c_str(), textX, mouseY + 10 + boxPadding + fontSize, fontSize,
+                    Raylib::Black);
+
+}
+
+bool WorkVisualiser::MouseInsideGraph() {
+   const int mouseX = Raylib::GetMouseX();
+   const int mouseY = Raylib::GetMouseY();
+
+   return mouseX >= 10 && mouseX < 10 + CHART_WIDTH
+          && mouseY >= 10 && mouseY < 10 + CHART_HEIGHT;
+}
+
+std::optional<SkinningSession> WorkVisualiser::GetSessionFromBarIndex(int barIndex) {
+   std::chrono::sys_days first_day = all_sessions_and_dates.front().second;
+
+   for (auto &[session, date]: all_sessions_and_dates) {
+      int sessionIndex = (std::chrono::sys_days(date) - first_day).count();
+      if (sessionIndex == barIndex) return session;
+   }
+
+   return std::nullopt;
 }

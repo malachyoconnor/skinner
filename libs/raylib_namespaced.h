@@ -2,6 +2,9 @@
 #include "raylib.h"
 
 namespace Raylib {
+   using Vector2 = ::Vector2;
+   using Color = ::Color;
+
    inline void InitWindow(int width, int height, const char *title) {
       ::InitWindow(width, height, title);
    }
@@ -33,6 +36,19 @@ namespace Raylib {
 
    inline void DrawText(const char *text, int posX, int posY, int fontSize, Color color) {
       ::DrawText(text, posX, posY, fontSize, color); // Draw text (using default font)
+   }
+
+
+   inline int GetMouseX(void) {
+      return ::GetMouseX(); // Get mouse position X
+   }
+
+   inline int GetMouseY(void) {
+      return ::GetMouseY(); // Get mouse position Y
+   }
+
+   inline int MeasureText(const char *text, int fontSize) {
+      return ::MeasureText(text, fontSize); // Measure string width for default font
    }
 
    static constexpr Color LightGray = LIGHTGRAY;
