@@ -35,7 +35,7 @@ inline void write_session_to_file(const SkinningSession& session, const std::str
    std::ofstream output_stream(file_name);
    assert(output_stream.is_open());
 
-   for (const auto &interval: session.get_interval_list()) {
+   for (const auto &interval: session.GetIntervalList()) {
       interval.write_interval_to_file(output_stream);
    }
 }

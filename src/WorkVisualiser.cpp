@@ -16,7 +16,7 @@ runtime_error *WorkVisualiser::LoadArchivedSessions() {
       auto [pastSession, err] = read_session_from_file(dir.path());
 
       if (err) return err;
-      if (pastSession->get_interval_list().empty()) continue;
+      if (pastSession->GetIntervalList().empty()) continue;
 
       std::stringstream ss{dir.path().filename().string()};
       std::chrono::year_month_day ymd{};
@@ -41,14 +41,40 @@ runtime_error *WorkVisualiser::LoadArchivedSessions() {
    return nullptr;
 }
 
-void WorkVisualiser::DrawBarGraph(int numberOfBars) {
+bool WorkVisualiser::MouseInsideSliderButton(double sliderPercentage) {
+   int mouseX = Raylib::GetMouseX();
+   int mouseY = Raylib::GetMouseY();
+
+   const int sliderX = SLIDER_X + sliderPercentage * SLIDER_WIDTH;
+
+   return mouseX >= sliderX && mouseX < sliderX + SLIDER_WIDTH
+   && mouseY >= SLIDER_Y && mouseY < SLIDER_Y + SLIDER_HEIGHT;
+
+}
+
+void WorkVisualiser::DrawSlider(int sliderIndex, int endSessionIndex) {
+
+   DrawRectangle(SLIDER_X, SLIDER_Y, SLIDER_WIDTH, SLIDER_HEIGHT, Raylib::Black);
+
+   double sliderPercentage = sliderIndex / static_cast<double>(endSessionIndex);
+   const int boxOffset = sliderPercentage * SLIDER_WIDTH;
+
+   DrawRectangle(SLIDER_X + boxOffset, SLIDER_Y, SLIDER_BUTTON_WIDTH, SLIDER_BUTTON_HEIGHT, Raylib::Red);
+
+   int mouseX = Raylib::GetMouseX();
+   if (MouseInsideSliderButton(sliderPercentage) && IsMouseButtonDown(0)) {
+      sliderIndex_ = static_cast<int>((mouseX - SLIDER_X-1) / static_cast<double>(SLIDER_WIDTH) * (endSessionIndex-1));
+   }
+}
+
+void WorkVisualiser::DrawBarGraph(int firstDayIndex, int endSessionIndex) {
    Raylib::DrawRectangle(10, 10, AXIS_WIDTH, CHART_HEIGHT - 20, Raylib::Black);
    Raylib::DrawRectangle(10, CHART_HEIGHT - 10, CHART_WIDTH, AXIS_WIDTH, Raylib::Black);
 
-   for (int barIndex = 0; barIndex < numberOfBars; barIndex++) {
+   for (int barIndex = firstDayIndex; barIndex < endSessionIndex; barIndex++) {
       if (!GetSessionFromBarIndex(barIndex)) continue;
 
-      DrawSingleBar(barIndex, numberOfBars, Raylib::Red);
+      DrawSingleBar(barIndex, (endSessionIndex - firstDayIndex), Raylib::Red);
    }
 }
 
@@ -65,26 +91,31 @@ void WorkVisualiser::DrawSingleBar(int barIndex, int numberOfBars, Raylib::Color
    Raylib::DrawRectangle(barX, firstBarY - barHeight, BAR_WIDTH, barHeight, color);
 }
 
-void WorkVisualiser::DrawAllText(int numberOfBars) {
-   DrawStatsText();
-   DrawHover(numberOfBars);
+void WorkVisualiser::DrawAllText(int firstDayIndex, int endDayIndex) {
+   DrawStatsText(firstDayIndex, endDayIndex);
+   DrawHover(endDayIndex);
 }
 
-void WorkVisualiser::DrawStatsText() {
+void WorkVisualiser::DrawStatsText(int firstDayIndex, int endDayIndex) {
    double totalHoursWorked = 0;
    double totalIntervals = 0;
-   int number_of_sessions = all_sessions_and_dates.size();
+   int numberOfSessionsWhereSkinnerWasActive = 0;
 
    Raylib::DrawRectangle(10, CHART_HEIGHT + 10, CHART_WIDTH, SCREEN_HEIGHT - CHART_HEIGHT - 20, Raylib::Gray);
 
-   for (const auto &session: all_sessions_and_dates | std::views::keys) {
+   for (int sessionIndex = firstDayIndex; sessionIndex < endDayIndex; ++sessionIndex) {
+      if (!GetSessionFromBarIndex(sessionIndex)) continue;
+      SkinningSession session = GetSessionFromBarIndex(sessionIndex).value();
+
       totalHoursWorked += session.CalculateTotalWorkTime() / 3600.0;
-      totalIntervals += session.get_num_intervals();
+      totalIntervals += session.GetNumberOfIntervals();
+      numberOfSessionsWhereSkinnerWasActive += 1;
    }
 
-   std::string avg_hours_worked = std::format("Average hours worked: {:.2}", totalHoursWorked / number_of_sessions);
+   std::string avg_hours_worked = std::format("Average hours worked: {:.2}",
+                                              totalHoursWorked / numberOfSessionsWhereSkinnerWasActive);
    std::string avg_number_of_sessions = std::format("Average num intervals   : {:.2}",
-                                                    totalIntervals / number_of_sessions);
+                                                    totalIntervals / numberOfSessionsWhereSkinnerWasActive);
 
    Raylib::DrawText(avg_hours_worked.c_str(), 20, CHART_HEIGHT + 20, 30, Raylib::Black);
    Raylib::DrawText(avg_number_of_sessions.c_str(), 20, CHART_HEIGHT + 50, 30, Raylib::Black);

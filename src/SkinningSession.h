@@ -19,19 +19,19 @@ public:
       _interval_list = std::move(sessions);
    }
 
-   [[nodiscard]] SessionState session_state() const {
+   [[nodiscard]] SessionState GetSessionState() const {
       return calculate_session_state();
    }
 
-   [[nodiscard]] std::size_t get_num_intervals() const {
+   [[nodiscard]] std::size_t GetNumberOfIntervals() const {
       return _interval_list.size();
    }
 
-   [[nodiscard]] std::vector<SkinningInterval>& get_interval_list() {
+   [[nodiscard]] std::vector<SkinningInterval>& GetIntervalList() {
       return _interval_list;
    }
 
-   [[nodiscard]] std::vector<SkinningInterval> get_interval_list() const {
+   [[nodiscard]] std::vector<SkinningInterval> GetIntervalList() const {
       return _interval_list;
    }
 
@@ -43,7 +43,7 @@ public:
    long CalculateTotalWorkTime() const {
       long work_time = 0;
 
-      for (SkinningInterval interval: get_interval_list()) {
+      for (SkinningInterval interval: GetIntervalList()) {
          if (interval.end_time == -1) {
             interval.end_time = get_seconds_since_epoch();
          }
@@ -56,9 +56,9 @@ public:
 
    long CalculateTotalBreakTime() const {
       long break_time = 0;
-      long break_start_time = get_interval_list().front().start_time;
+      long break_start_time = GetIntervalList().front().start_time;
 
-      for (SkinningInterval interval: get_interval_list()) {
+      for (SkinningInterval interval: GetIntervalList()) {
          if (interval.end_time == -1) {
             interval.end_time = get_seconds_since_epoch();
          }

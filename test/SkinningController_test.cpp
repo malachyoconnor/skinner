@@ -31,9 +31,9 @@ TEST(start_new_interval, Success) {
    auto [session, error] = read_session_from_file(TEST_FILE_NAME);
 
    ASSERT_EQ(error, nullptr);
-   EXPECT_EQ(session->get_num_intervals(), 3);
+   EXPECT_EQ(session->GetNumberOfIntervals(), 3);
 
-   auto last_interval = session->get_interval_list().back();
+   auto last_interval = session->GetIntervalList().back();
    EXPECT_EQ(last_interval.end_time, -1);
    EXPECT_GT(last_interval.start_time, -1);
 }
@@ -71,9 +71,9 @@ TEST(end_interval, Success) {
    auto [session, error] = read_session_from_file(TEST_FILE_NAME);
 
    ASSERT_EQ(error, nullptr);
-   EXPECT_EQ(session->get_num_intervals(), 2);
+   EXPECT_EQ(session->GetNumberOfIntervals(), 2);
 
-   auto last_interval = session->get_interval_list().back();
+   auto last_interval = session->GetIntervalList().back();
    EXPECT_NE(last_interval.end_time, -1);
 }
 

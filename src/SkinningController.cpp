@@ -16,8 +16,8 @@ using colours::PRINT, colours::PRINTLN;
 using enum colours::Colour;
 
 void SkinningController::start_new_interval() {
-   std::vector<SkinningInterval> &interval_list = _session.get_interval_list();
-   assert((interval_list.size() == 0 || _session.get_interval_list().back().end_time != -1)
+   std::vector<SkinningInterval> &interval_list = _session.GetIntervalList();
+   assert((interval_list.size() == 0 || _session.GetIntervalList().back().end_time != -1)
       && "Trying to start a new interval when the previous hasn't finished!");
 
    auto seconds_since_epoch = seconds(get_seconds_since_epoch());
@@ -29,7 +29,7 @@ void SkinningController::start_new_interval() {
 }
 
 void SkinningController::end_interval() {
-   SkinningInterval &final_interval = _session.get_interval_list().back();
+   SkinningInterval &final_interval = _session.GetIntervalList().back();
    assert(final_interval.end_time == -1 && "Attempting to end an already finished interval");
 
    final_interval.end_time = std::max(get_seconds_since_epoch(), final_interval.start_time);
@@ -37,7 +37,7 @@ void SkinningController::end_interval() {
 }
 
 int SkinningController::calculate_available_breaks() {
-   SkinningInterval current_interval = _session.get_interval_list().back();
+   SkinningInterval current_interval = _session.GetIntervalList().back();
 
    system_clock::time_point start_time(seconds(current_interval.start_time));
    auto seconds_since_start = duration_cast<seconds>(system_clock::now() - start_time);
@@ -65,7 +65,7 @@ void SkinningController::handle_starting_break() {
    PRINTLN("Should you choose to accept one", Green);
    getchar();
 
-   _session.get_interval_list().back().breaks_taken++;
+   _session.GetIntervalList().back().breaks_taken++;
    end_interval();
 
    atomic_bool break_finished{false};
@@ -100,7 +100,7 @@ void SkinningController::handle_starting_break() {
 }
 
 bool SkinningController::calculate_session_statistics() {
-   if (_session.session_state() == EMPTY) {
+   if (_session.GetSessionState() == EMPTY) {
       PRINTLN("No session currently running.", Red);
       return false;
    }
@@ -115,7 +115,7 @@ bool SkinningController::calculate_session_statistics() {
 }
 
 bool SkinningController::archive_time_log_file() {
-   auto start_time = time_point<system_clock>(seconds(_session.get_interval_list()[0].start_time));
+   auto start_time = time_point<system_clock>(seconds(_session.GetIntervalList()[0].start_time));
    string date_string = std::format("{:%Y-%m-%d}", start_time);
    const string archival_location = std::format("{}{}.txt", ARCHIVE_LOCATION, date_string);
 

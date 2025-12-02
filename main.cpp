@@ -68,7 +68,7 @@ int main(int argc, const char *argv[]) {
       case CHECK_SESSION: {
          auto [current_session, err] = read_session_from_file(FILE_NAME);
 
-         if (err || current_session->session_state() != IN_PROGRESS) {
+         if (err || current_session->GetSessionState() != IN_PROGRESS) {
             PRINTLN("No session currently running. Start a new session or resume your current one first.", Red);
             return EXIT_FAILURE;
          }
@@ -89,12 +89,12 @@ int main(int argc, const char *argv[]) {
       case RESUME_SESSION: {
          auto [current_session, read_successfully] = read_session_from_file(FILE_NAME);
 
-         if (current_session->session_state() == EMPTY) {
+         if (current_session->GetSessionState() == EMPTY) {
             PRINTLN("No session currently running.", Red);
             return EXIT_FAILURE;
          }
 
-         if (current_session->session_state() == IN_PROGRESS) {
+         if (current_session->GetSessionState() == IN_PROGRESS) {
             PRINTLN("You still have a session in progress", Red);
             return EXIT_FAILURE;
          }
@@ -118,12 +118,12 @@ int main(int argc, const char *argv[]) {
 
       case FINISH_SESSION: {
          auto [current_session, err] = read_session_from_file(FILE_NAME);
-         if (err || current_session->session_state() == EMPTY) {
+         if (err || current_session->GetSessionState() == EMPTY) {
             PRINTLN("No session currently running. Start a new session first.", Red);
             return EXIT_FAILURE;
          }
 
-         for (auto interval: current_session->get_interval_list()) {
+         for (auto interval: current_session->GetIntervalList()) {
             auto start_time = time_point<system_clock>(seconds(interval.start_time));
             auto end_time = time_point<system_clock>(
                seconds(interval.end_time == -1 ? get_seconds_since_epoch() : interval.end_time));
@@ -138,7 +138,7 @@ int main(int argc, const char *argv[]) {
          PRINTLN("Are you sure you want to finish this session? Otherwise Ctrl+C", Red);
          cin.get();
 
-         if (current_session->get_interval_list().back().end_time == -1) {
+         if (current_session->GetIntervalList().back().end_time == -1) {
             controller.end_interval();
          }
 
@@ -160,8 +160,6 @@ int main(int argc, const char *argv[]) {
       case VISUALISE: {
          WorkVisualiser vis = WorkVisualiser();
 
-         // TODO: Hovering should show me dates
-         // TODO: Colours shouldn't be quite so hideous
          // TODO: Slider to restrict dates considered
          // TODO: Mode where breaks are intersliced within the bar.
          //       I.e. parts of the bar are grey where we're taking a break.

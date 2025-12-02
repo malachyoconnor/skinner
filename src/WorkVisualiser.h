@@ -30,30 +30,36 @@ public:
 
       std::chrono::sys_days first_day = all_sessions_and_dates.front().second;
       std::chrono::sys_days last_day = all_sessions_and_dates.back().second;
-      const int numberOfBars = static_cast<int>((last_day - first_day).count() + 1);
+
+      const int endSessionIndex = static_cast<int>((last_day - first_day).count() + 1);
 
       while (!Raylib::WindowShouldClose()) {
+
          Raylib::BeginDrawing();
          Raylib::ClearBackground(Raylib::RayWhite);
-         DrawBarGraph(numberOfBars);
-         DrawAllText(numberOfBars);
+         DrawBarGraph(sliderIndex_, endSessionIndex);
+         DrawAllText(sliderIndex_, endSessionIndex);
+         DrawSlider(sliderIndex_, endSessionIndex);
          Raylib::EndDrawing();
       }
    }
 
-   void DrawBarGraph(int numberOfBars);
+   void DrawBarGraph(int firstDayIndex, int numberOfBars);
    void DrawSingleBar(int barIndex, int numberOfBars, Raylib::Color color);
-   void DrawAllText(int numberOfBars);
+   void DrawAllText(int firstDayIndex, int endDayIndex);
 
    ~WorkVisualiser() {
       Raylib::CloseWindow();
    }
 
 private:
-   void DrawStatsText();
+   bool MouseInsideSliderButton(double sliderPercentage);
+   void DrawSlider(int sliderIndex, int endSessionIndex);
+   void DrawStatsText(int firstDayIndex, int endDayIndex);
    void DrawHover(int numberOfBars);
    static bool MouseInsideGraph();
    std::optional<SkinningSession> GetSessionFromBarIndex(int barIndex);
+   int sliderIndex_ = 0;
 
    std::vector<std::pair<SkinningSession, std::chrono::year_month_day> > all_sessions_and_dates{};
    std::runtime_error *LoadArchivedSessions();
@@ -64,6 +70,13 @@ private:
    static constexpr int AXIS_WIDTH = 5;
 
    static constexpr int BAR_HEIGHT_PER_HOUR_WORKED = CHART_HEIGHT / 12;
+
+   static constexpr int SLIDER_WIDTH = 150;
+   static constexpr int SLIDER_HEIGHT = 50;
+   static constexpr int SLIDER_X = CHART_WIDTH / 2 + CHART_WIDTH / 4 - SLIDER_WIDTH / 2;
+   static constexpr int SLIDER_Y = CHART_HEIGHT + 10 + (SCREEN_HEIGHT - CHART_HEIGHT - 20) / 2 - SLIDER_HEIGHT/2;
+   static constexpr int SLIDER_BUTTON_WIDTH = 30;
+   static constexpr int SLIDER_BUTTON_HEIGHT = SLIDER_HEIGHT;
 };
 
 
