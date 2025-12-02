@@ -1,6 +1,4 @@
-#include <cassert>
 #include <chrono>
-#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <format>
@@ -134,10 +132,12 @@ int main(int argc, const char *argv[]) {
             std::printf("%s\n", time_range.c_str());
          }
 
+         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
+         controller.calculate_session_statistics();
+
          PRINTLN("Are you sure you want to finish this session? Otherwise Ctrl+C", Red);
          cin.get();
 
-         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
          if (current_session->get_interval_list().back().end_time == -1) {
             controller.end_interval();
          }

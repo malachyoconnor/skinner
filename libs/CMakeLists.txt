@@ -1,4 +1,5 @@
-add_library(raylib STATIC IMPORTED GLOBAL)
+add_library(raylib STATIC IMPORTED GLOBAL
+        raylib_namespaced.h raylib_namespaced.cpp)
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "(aarch64|arm64)")
     set_target_properties(raylib PROPERTIES
@@ -13,4 +14,4 @@ else ()
 endif ()
 
 target_include_directories(raylib INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-target_sources(raylib INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/raylib.h")
+target_sources(raylib INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/raylib_namespaced.h")

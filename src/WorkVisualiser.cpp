@@ -43,8 +43,8 @@ runtime_error *WorkVisualiser::LoadArchivedSessions() {
 void WorkVisualiser::DrawBarGraph() {
    constexpr int BAR_WIDTH = 5;
 
-   DrawRectangle(10, 10, BAR_WIDTH, CHART_HEIGHT - 20, BLACK);
-   DrawRectangle(10, CHART_HEIGHT - 10, CHART_WIDTH, BAR_WIDTH, BLACK);
+   Raylib::DrawRectangle(10, 10, BAR_WIDTH, CHART_HEIGHT - 20, Raylib::Black);
+   Raylib::DrawRectangle(10, CHART_HEIGHT - 10, CHART_WIDTH, BAR_WIDTH, Raylib::Black);
 
    std::chrono::sys_days first_day = all_sessions_and_dates.front().second;
    std::chrono::sys_days last_day = all_sessions_and_dates.back().second;
@@ -68,13 +68,17 @@ void WorkVisualiser::DrawBarGraph() {
 
       const int barHeight = barHeightPerHour * hoursWorked;
 
-      DrawRectangle(barX, firstBarY - barHeight, BAR_WIDTH, barHeight, RED);
+      Raylib::DrawRectangle(barX, firstBarY - barHeight, BAR_WIDTH, barHeight, Raylib::Red);
    }
+}
+
+void WorkVisualiser::DrawAllText() {
+   DrawStatsText();
 }
 
 void WorkVisualiser::DrawStatsText() {
 
-   DrawRectangle(10, CHART_HEIGHT + 10, CHART_WIDTH, SCREEN_HEIGHT - CHART_HEIGHT - 20, GRAY);
+   Raylib::DrawRectangle(10, CHART_HEIGHT + 10, CHART_WIDTH, SCREEN_HEIGHT - CHART_HEIGHT - 20, Raylib::Gray);
 
    double totalHoursWorked = 0;
    double totalIntervals = 0;
@@ -86,10 +90,14 @@ void WorkVisualiser::DrawStatsText() {
    }
 
    std::string avg_hours_worked = std::format("Average hours worked: {:.2}", totalHoursWorked / number_of_sessions);
-   std::string avg_number_of_sessions = std::format("Average num intervals   : {:.2}", totalIntervals / number_of_sessions);
+   std::string avg_number_of_sessions = std::format("Average num intervals   : {:.2}",
+                                                    totalIntervals / number_of_sessions);
 
+   Raylib::DrawText(avg_hours_worked.c_str(), 20, CHART_HEIGHT + 20, 30, Raylib::Black);
+   Raylib::DrawText(avg_number_of_sessions.c_str(), 20, CHART_HEIGHT + 50, 30, Raylib::Black);
 
-   DrawText(avg_hours_worked.c_str(), 20, CHART_HEIGHT+20, 30, BLACK);
-   DrawText(avg_number_of_sessions.c_str(), 20, CHART_HEIGHT + 50, 30, BLACK);
+}
+
+void WorkVisualiser::DrawHoverText() {
 
 }

@@ -2,7 +2,7 @@
 #define SKINNER_WORKVISUALISER_H
 
 #include <vector>
-#include "raylib.h"
+#include "raylib_namespaced.h"
 #include "SkinningSession.h"
 #include "utils.h"
 
@@ -17,7 +17,7 @@ constexpr int SCREEN_HEIGHT = 600;
 class WorkVisualiser {
 public:
    WorkVisualiser() {
-      InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "HELLO");
+      Raylib::InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "HELLO");
    }
 
    void Render() {
@@ -27,24 +27,26 @@ public:
          std::exit(1);
       }
 
-      while (!WindowShouldClose()) {
-         BeginDrawing();
-         ClearBackground(RAYWHITE);
+      while (!Raylib::WindowShouldClose()) {
+         Raylib::BeginDrawing();
+         Raylib::ClearBackground(Raylib::RayWhite);
          DrawBarGraph();
-         DrawStatsText();
-         EndDrawing();
+         DrawAllText();
+         Raylib::EndDrawing();
       }
    }
 
    void DrawBarGraph();
-   void DrawStatsText();
-
+   void DrawAllText();
 
    ~WorkVisualiser() {
-      CloseWindow();
+      Raylib::CloseWindow();
    }
 
 private:
+   void DrawStatsText();
+   void DrawHoverText();
+
    std::vector<std::pair<SkinningSession, std::chrono::year_month_day> > all_sessions_and_dates{};
    std::runtime_error* LoadArchivedSessions();
 
