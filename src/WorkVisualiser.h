@@ -45,7 +45,7 @@ public:
    }
 
    void DrawBarGraph(int firstDayIndex, int numberOfBars);
-   void DrawSingleBar(int barIndex, int numberOfBars, Raylib::Color color);
+   void DrawSingleBar(int firstDayIndex, int barIndex, int numberOfBars, Color color);
    void DrawAllText(int firstDayIndex, int endDayIndex);
 
    ~WorkVisualiser() {
@@ -53,13 +53,14 @@ public:
    }
 
 private:
-   bool MouseInsideSliderButton(double sliderPercentage);
+   bool MouseInsideSliderButton(int sliderX);
    void DrawSlider(int sliderIndex, int endSessionIndex);
    void DrawStatsText(int firstDayIndex, int endDayIndex);
-   void DrawHover(int numberOfBars);
+   void DrawHover(int firstDayIndex, int lastDayIndex);
    static bool MouseInsideGraph();
    std::optional<SkinningSession> GetSessionFromBarIndex(int barIndex);
    int sliderIndex_ = 0;
+   bool mouseWasClickingSlider_ = false;
 
    std::vector<std::pair<SkinningSession, std::chrono::year_month_day> > all_sessions_and_dates{};
    std::runtime_error *LoadArchivedSessions();
