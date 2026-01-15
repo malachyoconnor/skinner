@@ -13,7 +13,7 @@ class SkinningController {
 public:
    SkinningController() = delete;
 
-   explicit SkinningController(double average_hours,
+   explicit SkinningController(const double average_hours,
                               SkinningSession *previous_session,
                               std::string file_name) : _average_hours(average_hours),
                                                   _session(*previous_session),

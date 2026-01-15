@@ -5,7 +5,7 @@ namespace Raylib {
    using Vector2 = ::Vector2;
    using Color = ::Color;
 
-   inline void InitWindow(int width, int height, const char *title) {
+   inline void InitWindow(const int width, const int height, const char *title) {
       ::InitWindow(width, height, title);
    }
 
@@ -18,7 +18,7 @@ namespace Raylib {
       // Check if application should close (KEY_ESCAPE pressed or windows close icon clicked)
    }
 
-   inline void DrawRectangle(int posX, int posY, int width, int height, Color color) {
+   inline void DrawRectangle(const int posX, const int posY, const int width, const int height, const Color color) {
       ::DrawRectangle(posX, posY, width, height, color);
    }
 
@@ -30,11 +30,11 @@ namespace Raylib {
       ::EndDrawing(); // End canvas drawing and swap buffers (double buffering)
    }
 
-   inline void ClearBackground(Color color) {
+   inline void ClearBackground(const Color color) {
       ::ClearBackground(color);
    }
 
-   inline void DrawText(const char *text, int posX, int posY, int fontSize, Color color) {
+   inline void DrawText(const char *text, const int posX, const int posY, const int fontSize, const Color color) {
       ::DrawText(text, posX, posY, fontSize, color); // Draw text (using default font)
    }
 
@@ -47,7 +47,7 @@ namespace Raylib {
       return ::GetMouseY(); // Get mouse position Y
    }
 
-   inline int MeasureText(const char *text, int fontSize) {
+   inline int MeasureText(const char *text, const int fontSize) {
       return ::MeasureText(text, fontSize); // Measure string width for default font
    }
 

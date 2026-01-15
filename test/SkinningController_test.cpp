@@ -16,15 +16,15 @@
 // bool archive_time_log_file();
 
 TEST(start_new_interval, Success) {
-   auto current_time = get_seconds_since_epoch();
+   const auto current_time = get_seconds_since_epoch();
 
-   std::vector<SkinningInterval> intervals = {
+   const std::vector<SkinningInterval> intervals = {
       get_interval(current_time, current_time + ONE_HOUR),
       get_interval(current_time + ONE_HOUR, current_time + 2 * ONE_HOUR)
    };
 
-   SkinningSession new_session = SkinningSession(intervals);
-   SkinningController controller = SkinningController(0, &new_session, TEST_FILE_NAME);
+   auto new_session = SkinningSession(intervals);
+   auto controller = SkinningController(0, &new_session, TEST_FILE_NAME);
    write_session_to_file(new_session, TEST_FILE_NAME);
 
    controller.start_new_interval();
@@ -33,21 +33,21 @@ TEST(start_new_interval, Success) {
    ASSERT_EQ(error, nullptr);
    EXPECT_EQ(session->GetNumberOfIntervals(), 3);
 
-   auto last_interval = session->GetIntervalList().back();
+   const auto last_interval = session->GetIntervalList().back();
    EXPECT_EQ(last_interval.end_time, -1);
    EXPECT_GT(last_interval.start_time, -1);
 }
 
 TEST(start_new_interval, failure) {
-   auto current_time = get_seconds_since_epoch();
+   const auto current_time = get_seconds_since_epoch();
 
-   std::vector<SkinningInterval> intervals = {
+   const std::vector<SkinningInterval> intervals = {
       get_interval(current_time, current_time + ONE_HOUR),
       get_interval(current_time + ONE_HOUR, -1)
    };
 
-   SkinningSession new_session = SkinningSession(intervals);
-   SkinningController controller = SkinningController(0, &new_session, TEST_FILE_NAME);
+   auto new_session = SkinningSession(intervals);
+   auto controller = SkinningController(0, &new_session, TEST_FILE_NAME);
    write_session_to_file(new_session, TEST_FILE_NAME);
 
    EXPECT_DEATH({controller.start_new_interval();},
@@ -56,15 +56,15 @@ TEST(start_new_interval, failure) {
 
 
 TEST(end_interval, Success) {
-   auto current_time = get_seconds_since_epoch();
+   const auto current_time = get_seconds_since_epoch();
 
-   std::vector<SkinningInterval> intervals = {
+   const std::vector<SkinningInterval> intervals = {
       get_interval(current_time, current_time + ONE_HOUR),
       get_interval(current_time + ONE_HOUR, -1)
    };
 
-   SkinningSession new_session = SkinningSession(intervals);
-   SkinningController controller = SkinningController(0, &new_session, TEST_FILE_NAME);
+   auto new_session = SkinningSession(intervals);
+   auto controller = SkinningController(0, &new_session, TEST_FILE_NAME);
    write_session_to_file(new_session, TEST_FILE_NAME);
 
    controller.end_interval();
@@ -73,20 +73,20 @@ TEST(end_interval, Success) {
    ASSERT_EQ(error, nullptr);
    EXPECT_EQ(session->GetNumberOfIntervals(), 2);
 
-   auto last_interval = session->GetIntervalList().back();
+   const auto last_interval = session->GetIntervalList().back();
    EXPECT_NE(last_interval.end_time, -1);
 }
 
 TEST(end_interval, failure) {
-   auto current_time = get_seconds_since_epoch();
+   const auto current_time = get_seconds_since_epoch();
 
-   std::vector<SkinningInterval> intervals = {
+   const std::vector<SkinningInterval> intervals = {
       get_interval(current_time, current_time + ONE_HOUR),
       get_interval(current_time + ONE_HOUR, current_time + ONE_HOUR * 2)
    };
 
-   SkinningSession new_session = SkinningSession(intervals);
-   SkinningController controller = SkinningController(0, &new_session, TEST_FILE_NAME);
+   auto new_session = SkinningSession(intervals);
+   auto controller = SkinningController(0, &new_session, TEST_FILE_NAME);
    write_session_to_file(new_session, TEST_FILE_NAME);
 
    EXPECT_DEATH({controller.end_interval();},

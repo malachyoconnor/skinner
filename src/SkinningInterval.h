@@ -16,7 +16,7 @@ struct SkinningInterval {
 
    SkinningInterval() = default;
 
-   SkinningInterval(long start_time, long end_time, int breaks_taken) : start_time(start_time), end_time(end_time),
+   SkinningInterval(const long start_time, const long end_time, const int breaks_taken) : start_time(start_time), end_time(end_time),
                                                                         breaks_taken(breaks_taken) {
       assert((end_time == -1 || start_time <= end_time) && "Start time greater than end time!");
    }

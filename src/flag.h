@@ -69,13 +69,13 @@ namespace flag {
 
    void outputHelpMessageAndExit();
 
-   inline void parseFlags(int argc, const char *argv[]) {
+   inline void parseFlags(const int argc, const char *argv[]) {
       std::map<string, string> name_value_map{};
 
       populateNameValueMap(argc, argv, name_value_map);
 
       for (auto &flag: intFlagsToParse) {
-         if (name_value_map.find(flag.name) == name_value_map.end()) continue;
+         if (!name_value_map.contains(flag.name)) continue;
 
          string unparsed_value = name_value_map[flag.name];
          *flag.parsedValue = std::stoi(unparsed_value);
@@ -83,7 +83,7 @@ namespace flag {
       intFlagsToParse.clear();
 
       for (auto &flag: doubleFlagsToParse) {
-         if (name_value_map.find(flag.name) == name_value_map.end()) continue;
+         if (!name_value_map.contains(flag.name)) continue;
 
          string unparsed_value = name_value_map[flag.name];
          *flag.parsedValue = std::stod(unparsed_value);
@@ -91,23 +91,23 @@ namespace flag {
       doubleFlagsToParse.clear();
 
       for (auto &flag: stringFlagsToParse) {
-         if (name_value_map.find(flag.name) == name_value_map.end()) continue;
+         if (!name_value_map.contains(flag.name)) continue;
 
          *flag.parsedValue = name_value_map[flag.name];
       }
       stringFlagsToParse.clear();
 
       for (auto &flag: booleanFlagsToParse) {
-         if (name_value_map.find(flag.name) == name_value_map.end()) continue;
+         if (!name_value_map.contains(flag.name)) continue;
 
          *flag.parsedValue = true;
       }
       stringFlagsToParse.clear();
    }
 
-   inline void populateNameValueMap(int argc, const char *argv[], std::map<string, string> &name_value_map) {
+   inline void populateNameValueMap(const int argc, const char *argv[], std::map<string, string> &name_value_map) {
       for (int argNum = 1; argNum < argc; ++argNum) {
-         string argument = string(argv[argNum]);
+         auto argument = string(argv[argNum]);
 
          if (!argument.starts_with("-")) {
             continue;
@@ -127,7 +127,7 @@ namespace flag {
          }
 
          string name = argument.substr(1, argument.find('=') - 1);
-         string value = argument.substr(argument.find('=') + 1);
+         const string value = argument.substr(argument.find('=') + 1);
 
          if (name_value_map.contains(name)) {
             PRINTLN("Flag entered twice: ", Red);

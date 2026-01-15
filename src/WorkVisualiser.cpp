@@ -6,23 +6,23 @@
 
 #include "FileReadingUtil.h"
 
-void WorkVisualiser::DrawBarGraph(int firstDayIndex, int endSessionIndex) {
+void WorkVisualiser::DrawBarGraph(const int firstDayIndex, const int endSessionIndex) {
    Raylib::DrawRectangle(10, 10, AXIS_WIDTH, CHART_HEIGHT - 20, Raylib::Black);
    Raylib::DrawRectangle(10, CHART_HEIGHT - 10, CHART_WIDTH, AXIS_WIDTH, Raylib::Black);
 
    for (int barIndex = firstDayIndex; barIndex < endSessionIndex; barIndex++) {
       if (!GetSessionFromBarIndex(barIndex)) continue;
 
-      DrawSingleBar(firstDayIndex, barIndex, (endSessionIndex - firstDayIndex), Raylib::Red);
+      DrawSingleBar(firstDayIndex, barIndex, endSessionIndex - firstDayIndex, Raylib::Red);
    }
 }
 
-void WorkVisualiser::DrawSingleBar(int firstDayIndex, int barIndex, int numberOfBars, Raylib::Color color) {
+void WorkVisualiser::DrawSingleBar(const int firstDayIndex, const int barIndex, const int numberOfBars, const Raylib::Color color) {
    const int BAR_GAP = (CHART_WIDTH - BAR_WIDTH * numberOfBars) / (numberOfBars - 1);
    const int barX = 10 + AXIS_WIDTH + BAR_GAP + (barIndex - firstDayIndex) * (BAR_WIDTH + BAR_GAP);
    constexpr int firstBarY = CHART_HEIGHT - 10;
 
-   SkinningSession session = GetSessionFromBarIndex(barIndex).value();
+   const SkinningSession session = GetSessionFromBarIndex(barIndex).value();
    const auto hoursWorked = session.CalculateTotalWorkTime() / 3600;
    assert(hoursWorked < 12 && "You worked more than 12 hours???");
    const int barHeight = BAR_HEIGHT_PER_HOUR_WORKED * hoursWorked;
@@ -30,21 +30,21 @@ void WorkVisualiser::DrawSingleBar(int firstDayIndex, int barIndex, int numberOf
    Raylib::DrawRectangle(barX, firstBarY - barHeight, BAR_WIDTH, barHeight, color);
 }
 
-void WorkVisualiser::DrawAllText(int firstDayIndex, int endDayIndex) {
+void WorkVisualiser::DrawAllText(const int firstDayIndex, const int endDayIndex) {
    DrawStatsText(firstDayIndex, endDayIndex);
    DrawHover(firstDayIndex, endDayIndex);
 }
 
-void WorkVisualiser::DrawSlider(int sliderIndex, int endSessionIndex) {
+void WorkVisualiser::DrawSlider(const int sliderIndex, const int endSessionIndex) {
 
    DrawRectangle(SLIDER_X, SLIDER_Y, SLIDER_WIDTH, SLIDER_HEIGHT, Raylib::Black);
 
-   double sliderPercentage = sliderIndex / static_cast<double>(endSessionIndex);
+   const double sliderPercentage = sliderIndex / static_cast<double>(endSessionIndex);
    const int sliderX = SLIDER_X + static_cast<int>(sliderPercentage * SLIDER_WIDTH);
 
    DrawRectangle(sliderX, SLIDER_Y, SLIDER_BUTTON_WIDTH, SLIDER_BUTTON_HEIGHT, Raylib::Red);
 
-   int mouseX = Raylib::GetMouseX();
+   const int mouseX = Raylib::GetMouseX();
    if ((mouseWasClickingSlider_ || MouseInsideSliderButton(sliderX)) && IsMouseButtonDown(0)) {
       mouseWasClickingSlider_ = true;
 
@@ -68,16 +68,16 @@ void WorkVisualiser::DrawSlider(int sliderIndex, int endSessionIndex) {
    }
 }
 
-bool WorkVisualiser::MouseInsideSliderButton(int sliderX) {
-   int mouseX = Raylib::GetMouseX();
-   int mouseY = Raylib::GetMouseY();
+bool WorkVisualiser::MouseInsideSliderButton(const int sliderX) {
+   const int mouseX = Raylib::GetMouseX();
+   const int mouseY = Raylib::GetMouseY();
 
    return mouseX >= sliderX && mouseX < sliderX + SLIDER_WIDTH
           && mouseY >= SLIDER_Y && mouseY < SLIDER_Y + SLIDER_HEIGHT;
 
 }
 
-void WorkVisualiser::DrawStatsText(int firstDayIndex, int endDayIndex) {
+void WorkVisualiser::DrawStatsText(const int firstDayIndex, const int endDayIndex) {
    double totalHoursWorked = 0;
    double totalIntervals = 0;
    int numberOfSessionsWhereSkinnerWasActive = 0;
@@ -93,9 +93,9 @@ void WorkVisualiser::DrawStatsText(int firstDayIndex, int endDayIndex) {
       numberOfSessionsWhereSkinnerWasActive += 1;
    }
 
-   std::string avg_hours_worked = std::format("Average hours worked: {:.2}",
+   const std::string avg_hours_worked = std::format("Average hours worked: {:.2}",
                                               totalHoursWorked / numberOfSessionsWhereSkinnerWasActive);
-   std::string avg_number_of_sessions = std::format("Average num intervals   : {:.2}",
+   const std::string avg_number_of_sessions = std::format("Average num intervals   : {:.2}",
                                                     totalIntervals / numberOfSessionsWhereSkinnerWasActive);
 
    Raylib::DrawText(avg_hours_worked.c_str(), 20, CHART_HEIGHT + 20, 30, Raylib::Black);
@@ -103,7 +103,7 @@ void WorkVisualiser::DrawStatsText(int firstDayIndex, int endDayIndex) {
 
 }
 
-void WorkVisualiser::DrawHover(int firstDayIndex, int lastDayIndex) {
+void WorkVisualiser::DrawHover(const int firstDayIndex, const int lastDayIndex) {
    if (!MouseInsideGraph()) return;
 
    const int numberOfBars = lastDayIndex - firstDayIndex;
@@ -112,7 +112,7 @@ void WorkVisualiser::DrawHover(int firstDayIndex, int lastDayIndex) {
    const int mouseY = Raylib::GetMouseY();
 
    const int ChartX = 10 + AXIS_WIDTH;
-   const bool mouseOnABar = ((mouseX - ChartX) % (BAR_GAP + BAR_WIDTH)) > (BAR_GAP / 2);
+   const bool mouseOnABar = (mouseX - ChartX) % (BAR_GAP + BAR_WIDTH) > BAR_GAP / 2;
 
    const char *ON_BAR = mouseOnABar ? "MOUSE ON BAR" : "";
    Raylib::DrawText(ON_BAR, 50, 50, 50, Raylib::Green);
@@ -123,7 +123,7 @@ void WorkVisualiser::DrawHover(int firstDayIndex, int lastDayIndex) {
    if (!GetSessionFromBarIndex(barIndex)) return;
    DrawSingleBar(firstDayIndex, barIndex, numberOfBars, Raylib::Blue);
 
-   SkinningSession session = GetSessionFromBarIndex(barIndex).value();
+   const SkinningSession session = GetSessionFromBarIndex(barIndex).value();
    const std::string workText = std::format("Worked for {:.2} hours",
                                             static_cast<double>(session.CalculateTotalWorkTime()) / 3600.0);
    const std::string breakText = std::format("Relaxed for {:.2} hours",
@@ -139,7 +139,7 @@ void WorkVisualiser::DrawHover(int firstDayIndex, int lastDayIndex) {
    if (boxX + boxWidth > SCREEN_WIDTH) {
       boxX = SCREEN_WIDTH - boxWidth - 5;
    }
-   int textX = boxX + boxPadding;
+   const int textX = boxX + boxPadding;
 
    Raylib::DrawRectangle(boxX, mouseY + 10, boxWidth, boxHeight, GRAY);
    Raylib::DrawText(workText.c_str(), textX, mouseY + 10 + boxPadding, fontSize, Raylib::Black);
@@ -155,11 +155,11 @@ bool WorkVisualiser::MouseInsideGraph() {
           && mouseY >= 10 && mouseY < 10 + CHART_HEIGHT;
 }
 
-std::optional<SkinningSession> WorkVisualiser::GetSessionFromBarIndex(int barIndex) {
-   std::chrono::sys_days first_day = all_sessions_and_dates.front().second;
+std::optional<SkinningSession> WorkVisualiser::GetSessionFromBarIndex(const int barIndex) {
+   const std::chrono::sys_days first_day = all_sessions_and_dates.front().second;
 
    for (auto &[session, date]: all_sessions_and_dates) {
-      int sessionIndex = (std::chrono::sys_days(date) - first_day).count();
+      const int sessionIndex = (std::chrono::sys_days(date) - first_day).count();
       if (sessionIndex == barIndex) return session;
    }
 
@@ -183,7 +183,7 @@ runtime_error *WorkVisualiser::LoadArchivedSessions() {
       ss >> std::chrono::parse("%F", ymd);
 
       if (ss.fail()) {
-         std::string error_text = std::format("Failed to parse date string: {}", dir.path().string());
+         const std::string error_text = std::format("Failed to parse date string: {}", dir.path().string());
          return new runtime_error(error_text);
       }
 
@@ -192,11 +192,11 @@ runtime_error *WorkVisualiser::LoadArchivedSessions() {
 
    if (all_sessions_and_dates.empty()) return new runtime_error("No archived sessions");
 
-   std::sort(all_sessions_and_dates.begin(), all_sessions_and_dates.end(),
-             [](const std::pair<SkinningSession, std::chrono::year_month_day> &p1,
-                const std::pair<SkinningSession, std::chrono::year_month_day> &p2) {
-                return p1.second < p2.second;
-             });
+   std::ranges::sort(all_sessions_and_dates,
+                  [](const std::pair<SkinningSession, std::chrono::year_month_day> &p1,
+                     const std::pair<SkinningSession, std::chrono::year_month_day> &p2) {
+                     return p1.second < p2.second;
+                  });
 
    return nullptr;
 }

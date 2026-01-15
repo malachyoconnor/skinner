@@ -36,7 +36,7 @@ public:
    }
 
    static SkinningSession *newSkinningSession() {
-      std::vector<SkinningInterval> empty_session_log{};
+      const std::vector<SkinningInterval> empty_session_log{};
       return new SkinningSession(empty_session_log);
    }
 

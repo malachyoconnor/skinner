@@ -27,7 +27,7 @@ inline std::string COMMAND_LIST[_number_of_commands_] = {
 };
 
 inline SkinnerCommand parseCommand(std::string cmd) {
-   std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
+   std::ranges::transform(cmd, cmd.begin(), tolower);
 
    for (int i = 0; i < _number_of_commands_; i++) {
       if (cmd == COMMAND_LIST[i]) {
@@ -47,13 +47,13 @@ inline SkinnerCommand parseCommand(std::string cmd) {
 
 inline long get_seconds_since_epoch() {
 
-   return duration_cast<std::chrono::seconds>(
-      std::chrono::system_clock::now().time_since_epoch()
+   return duration_cast<seconds>(
+      system_clock::now().time_since_epoch()
    ).count();
 }
 
-inline std::string get_human_readable_time(std::chrono::system_clock::time_point tp) {
-   auto utc_offset = std::chrono::current_zone()->get_info(tp).offset;
+inline std::string get_human_readable_time(const system_clock::time_point tp) {
+   const auto utc_offset = std::chrono::current_zone()->get_info(tp).offset;
 
    std::string human_readable_time = std::format("{0:%R}", tp + utc_offset);
    return human_readable_time;
@@ -61,15 +61,16 @@ inline std::string get_human_readable_time(std::chrono::system_clock::time_point
 
 namespace colours {
    enum Colour {
-      Red, Green
+      Red, Green, Default
    };
 
-#define START_COLOUR "\033["
+#define ESCAPE_CHARACTER "\033["
 
-   inline const char *start(Colour col) {
+   inline const char *start(const Colour col) {
       switch (col) {
-         case Red: return START_COLOUR "31m";
-         case Green: return START_COLOUR "32m";
+         case Red: return ESCAPE_CHARACTER "31m";
+         case Green: return ESCAPE_CHARACTER "32m";
+         case Default: return "";
       }
 
       __builtin_unreachable();
@@ -79,11 +80,18 @@ namespace colours {
       return "\033[0m";
    }
 
-   inline void PRINT(const char *str, Colour col) {
+   inline std::string getCurrentTimeString() {
+      const string current_time = std::format("{:%d/%m/%y %H:%M}", system_clock::now());
+      return std::format("[{}{}{}] ", start(Green), current_time.c_str(), end());
+   }
+
+   inline void PRINT(const char *str, const Colour col) {
+      std::fputs(getCurrentTimeString().c_str(), stdout);
       std::printf("%s%s%s", start(col), str, end());
    }
 
-   inline void PRINTLN(const char *str, Colour col) {
+   inline void PRINTLN(const char *str, const Colour col) {
+      std::fputs(getCurrentTimeString().c_str(), stdout);
       std::printf("%s%s\n%s", start(col), str, end());
    }
 }

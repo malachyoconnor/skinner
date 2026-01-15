@@ -21,15 +21,15 @@ public:
    }
 
    void Render() {
-      if (auto err = LoadArchivedSessions()) {
-         std::string errorString = std::format("Failed to load archived sessions with error: {}", err->what());
+      if (const auto err = LoadArchivedSessions()) {
+         const std::string errorString = std::format("Failed to load archived sessions with error: {}", err->what());
          colours::PRINT(errorString.c_str(), colours::Red);
          std::exit(1);
       }
 
 
-      std::chrono::sys_days first_day = all_sessions_and_dates.front().second;
-      std::chrono::sys_days last_day = all_sessions_and_dates.back().second;
+      const std::chrono::sys_days first_day = all_sessions_and_dates.front().second;
+      const std::chrono::sys_days last_day = all_sessions_and_dates.back().second;
 
       const int endSessionIndex = static_cast<int>((last_day - first_day).count() + 1);
 

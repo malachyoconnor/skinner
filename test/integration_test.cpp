@@ -19,7 +19,7 @@ std::string exec(std::string &cmd) {
    std::string result{};
    std::array<char, 128> buffer;
    while (fgets(buffer.begin(), 128, pipe) != nullptr) {
-      for (char c: buffer) {
+      for (const char c: buffer) {
          if (c == '\0') break;
          result += c;
       }
@@ -29,15 +29,15 @@ std::string exec(std::string &cmd) {
 
 TEST(STAT, StraightForwardStats) {
 
-   auto current_time = get_seconds_since_epoch();
+   const auto current_time = get_seconds_since_epoch();
 
-   std::vector<SkinningInterval> intervals = {
+   const std::vector<SkinningInterval> intervals = {
       get_interval(current_time, current_time + ONE_HOUR),
       get_interval(current_time + ONE_HOUR, current_time + 2*ONE_HOUR)
    };
 
-   SkinningSession new_session = SkinningSession(intervals);
-   SkinningController controller = SkinningController(0, &new_session, TEST_FILE_NAME);
+   auto new_session = SkinningSession(intervals);
+   auto controller = SkinningController(0, &new_session, TEST_FILE_NAME);
    write_session_to_file(new_session, TEST_FILE_NAME);
 
    std::string cmd1 = std::format("{} stat -file=time_log.txt", SKINNER_EXECUTABLE);

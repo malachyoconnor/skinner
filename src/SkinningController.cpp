@@ -20,7 +20,7 @@ void SkinningController::start_new_interval() {
    assert((interval_list.size() == 0 || _session.GetIntervalList().back().end_time != -1)
       && "Trying to start a new interval when the previous hasn't finished!");
 
-   auto seconds_since_epoch = seconds(get_seconds_since_epoch());
+   const auto seconds_since_epoch = seconds(get_seconds_since_epoch());
    interval_list.push_back(
       SkinningInterval(seconds_since_epoch.count(), -1, 0)
    );
@@ -37,10 +37,10 @@ void SkinningController::end_interval() {
 }
 
 int SkinningController::calculate_available_breaks() {
-   SkinningInterval current_interval = _session.GetIntervalList().back();
+   const SkinningInterval current_interval = _session.GetIntervalList().back();
 
-   system_clock::time_point start_time(seconds(current_interval.start_time));
-   auto seconds_since_start = duration_cast<seconds>(system_clock::now() - start_time);
+   const system_clock::time_point start_time(seconds(current_interval.start_time));
+   const auto seconds_since_start = duration_cast<seconds>(system_clock::now() - start_time);
 
    auto seconds_since_last_break = seconds_since_start;
    std::mt19937 gen(current_interval.start_time);
@@ -48,8 +48,8 @@ int SkinningController::calculate_available_breaks() {
    int breaks_allowed = -current_interval.breaks_taken;
 
    while (seconds_since_last_break.count() > 0) {
-      double generated_hours_to_work = _distribution(gen);
-      duration<long> work_seconds(static_cast<long>(generated_hours_to_work * 3600));
+      const double generated_hours_to_work = _distribution(gen);
+      const duration<long> work_seconds(static_cast<long>(generated_hours_to_work * 3600));
 
       seconds_since_last_break -= work_seconds;
       if (seconds_since_last_break.count() > 0) {
@@ -71,7 +71,7 @@ void SkinningController::handle_starting_break() {
    atomic_bool break_finished{false};
    long start_time{get_seconds_since_epoch()};
 
-   thread new_thread =
+   auto new_thread =
          thread([&start_time, &break_finished] {
             printf("Break started\n");
             while (!break_finished.load()) {
@@ -105,11 +105,11 @@ bool SkinningController::calculate_session_statistics() {
       return false;
    }
 
-   long work_time = _session.CalculateTotalWorkTime();
-   long break_time = _session.CalculateTotalBreakTime();
+   const long work_time = _session.CalculateTotalWorkTime();
+   const long break_time = _session.CalculateTotalBreakTime();
 
-   printf("Time worked   : %ld:%.2ld:%.2ld \n", work_time / 3600, (work_time % 3600) / 60, work_time % 60);
-   printf("Time in breaks: %ld:%.2ld:%.2ld \n", break_time / 3600, (break_time % 3600) / 60, break_time % 60);
+   printf("Time worked   : %ld:%.2ld:%.2ld \n", work_time / 3600, work_time % 3600 / 60, work_time % 60);
+   printf("Time in breaks: %ld:%.2ld:%.2ld \n", break_time / 3600, break_time % 3600 / 60, break_time % 60);
 
    return true;
 }

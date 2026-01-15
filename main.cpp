@@ -59,7 +59,7 @@ int main(int argc, const char *argv[]) {
          }
 
          SkinningSession *new_session = SkinningSession::newSkinningSession();
-         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, new_session, FILE_NAME);
+         auto controller = SkinningController(INTERVAL_LENGTH_HOURS, new_session, FILE_NAME);
          controller.start_new_interval();
          PRINTLN("New session started 👍", Green);
          return EXIT_SUCCESS;
@@ -73,10 +73,9 @@ int main(int argc, const char *argv[]) {
             return EXIT_FAILURE;
          }
 
-         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
-         int breaks_allowed = controller.calculate_available_breaks();
+         auto controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
 
-         if (breaks_allowed > 0) {
+         if (int breaks_allowed = controller.calculate_available_breaks(); breaks_allowed > 0) {
             controller.handle_starting_break();
             controller.start_new_interval();
             PRINTLN("Session resumed 👍", Green);
@@ -99,7 +98,7 @@ int main(int argc, const char *argv[]) {
             return EXIT_FAILURE;
          }
 
-         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
+         auto controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
          controller.start_new_interval();
          PRINTLN("Session resumed 👍", Green);
          return EXIT_SUCCESS;
@@ -111,7 +110,7 @@ int main(int argc, const char *argv[]) {
             PRINTLN(reading_error->what(), Red);
             return EXIT_FAILURE;
          }
-         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
+         auto controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
          bool success = controller.calculate_session_statistics();
          return success ? EXIT_SUCCESS : EXIT_FAILURE;
       }
@@ -132,7 +131,7 @@ int main(int argc, const char *argv[]) {
             std::printf("%s\n", time_range.c_str());
          }
 
-         SkinningController controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
+         auto controller = SkinningController(INTERVAL_LENGTH_HOURS, current_session, FILE_NAME);
          controller.calculate_session_statistics();
 
          PRINTLN("Are you sure you want to finish this session? Otherwise Ctrl+C", Red);
@@ -158,7 +157,7 @@ int main(int argc, const char *argv[]) {
       }
 
       case VISUALISE: {
-         WorkVisualiser vis = WorkVisualiser();
+         auto vis = WorkVisualiser();
 
          // TODO: Slider to restrict dates considered
          // TODO: Mode where breaks are intersliced within the bar.
